@@ -49,11 +49,26 @@ class ProjectService:
 
     async def get_project_dna(self, project_id: str) -> ProjectDnaResponse | None:
         dna = await self._repo.get_dna(project_id)
-        return ProjectDnaResponse(project_id=project_id, **dna.dna) if dna else None
+        if not dna:
+            return None
+        dna_dict = {k: v for k, v in dna.dna.items() if k != "project_id"}
+        return ProjectDnaResponse(project_id=project_id, **dna_dict)
 
     async def upsert_project_dna(self, project_id: str, dna: dict[str, object]) -> ProjectDnaResponse:
         dna_model = await self._repo.upsert_dna(project_id, dna)
-        return ProjectDnaResponse(project_id=project_id, **dna_model.dna)
+        dna_dict = {k: v for k, v in dna_model.dna.items() if k != "project_id"}
+        return ProjectDnaResponse(project_id=project_id, **dna_dict)
+
+    async def delete_project(self, project_id: str) -> bool:
+        from memory_engine.retrieval.vector_store import QdrantVectorStore
+        import logging
+        logger = logging.getLogger("mnemosyne")
+        try:
+            vector_store = QdrantVectorStore()
+            await vector_store.delete_memories_by_project(project_id)
+        except Exception as e:
+            logger.error(f"Failed to clear Qdrant vectors for project {project_id}: {e}")
+        return await self._repo.delete(project_id)
 
 
 def get_project_service(

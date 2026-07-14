@@ -75,7 +75,7 @@ async function apiRequest(path, options = {}) {
 // Sync messages to backend
 // ─────────────────────────────────────────────────────────────────────────────
 
-async function syncMessagesToBackend(messages, tabUrl) {
+async function syncMessagesToBackend(messages, tabUrl, platformName) {
   const project = await getSelectedProject();
   if (!project) {
     console.warn("[Mnemosyne] No project selected — skipping sync.");
@@ -97,7 +97,11 @@ async function syncMessagesToBackend(messages, tabUrl) {
           created_at: msg.created_at,
           metadata: {},
         })),
-        metadata: { source_url: tabUrl, via: "chrome_extension" },
+        metadata: {
+          source_url: tabUrl,
+          via: "chrome_extension",
+          platform: platformName || "Unknown",
+        },
       }),
     });
 
@@ -194,7 +198,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case "MESSAGES_CAPTURED":
         await syncMessagesToBackend(
           message.payload.messages,
-          message.payload.url
+          message.payload.url,
+          message.payload.platform
         );
         sendResponse({ ok: true });
         break;

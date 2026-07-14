@@ -116,3 +116,18 @@ class QdrantVectorStore:
                 )
             )
         return memories
+
+    async def delete_memories_by_project(self, project_id: str) -> None:
+        query_filter = rest.Filter(
+            must=[
+                rest.FieldCondition(
+                    key="project_id",
+                    match=rest.MatchValue(value=project_id),
+                )
+            ]
+        )
+        await asyncio.to_thread(
+            self._client.delete,
+            collection_name=self.COLLECTION_NAME,
+            points_selector=query_filter,
+        )

@@ -1008,6 +1008,9 @@
           <select id="global-project-select" class="select-project">
             <option value="">— Select a project —</option>
           </select>
+          <button id="btn-delete-active-project" class="btn btn-secondary" style="width: auto; padding: 10px 16px; display: none; color: var(--color-error); border-color: rgba(239, 68, 68, 0.2); background: rgba(239, 68, 68, 0.05); font-size: 13px; font-weight: 600;">
+            🗑️ Delete
+          </button>
         </div>
         <div class="system-health">
           <div class="status-indicator">
@@ -1317,11 +1320,16 @@
     }
 
     async function selectProject(projectId) {
-      if (!projectId) return;
+      const deleteBtn = document.getElementById("btn-delete-active-project");
+      if (!projectId) {
+        if (deleteBtn) deleteBtn.style.display = "none";
+        return;
+      }
       state.activeProjectId = projectId;
       localStorage.setItem("mnemosyne_active_project_id", projectId);
       
       state.activeProject = state.projects.find(p => p.id === projectId);
+      if (deleteBtn) deleteBtn.style.display = "inline-block";
       
       logActivity(`Switched project workspace to: "${state.activeProject.name}"`, "info");
       
@@ -1334,6 +1342,56 @@
 
     document.getElementById("global-project-select").addEventListener("change", (e) => {
       selectProject(e.target.value);
+    });
+
+    document.getElementById("btn-delete-active-project").addEventListener("click", async () => {
+      if (!state.activeProjectId) return;
+      const projName = state.activeProject ? state.activeProject.name : state.activeProjectId;
+      if (!confirm(`Are you sure you want to delete the project "${projName}"?\n\nThis will permanently clear all its conversations, messages, memories, and embeddings, and cannot be undone.`)) {
+        return;
+      }
+      
+      try {
+        logActivity(`Deleting project: "${projName}"...`, "info");
+        await apiFetch(`/projects/${state.activeProjectId}`, {
+          method: "DELETE"
+        });
+        logActivity(`Project "${projName}" deleted successfully.`, "info");
+        
+        state.activeProjectId = "";
+        state.activeProject = null;
+        localStorage.removeItem("mnemosyne_active_project_id");
+        
+        document.getElementById("btn-delete-active-project").style.display = "none";
+        
+        await refreshProjects();
+        
+        if (state.projects.length > 0) {
+          state.activeProjectId = state.projects[0].id;
+          document.getElementById("global-project-select").value = state.activeProjectId;
+          await selectProject(state.activeProjectId);
+        } else {
+          document.getElementById("global-project-select").value = "";
+          clearActiveChat();
+          state.conversations = [];
+          state.memories = [];
+          state.relationships = [];
+          renderConversationsList();
+          renderMemoriesTable("all");
+          document.getElementById("overview-dna-preview").innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+              <p style="margin-bottom: 12px;">Welcome to Mnemosyne! No projects exist yet.</p>
+              <button class="btn btn-primary" id="btn-welcome-create" style="width: auto; display: inline-block;">Create Project</button>
+            </div>
+          `;
+          document.getElementById("btn-welcome-create").addEventListener("click", triggerNewProjectModal);
+          document.getElementById("overview-analytics-preview").innerHTML = "No project loaded.";
+          updateDashboardCounts();
+        }
+      } catch (err) {
+        logActivity(`Failed to delete project: ${err.message}`, "error");
+        alert(`Error deleting project: ${err.message}`);
+      }
     });
 
     // Navigation tabs
@@ -1461,7 +1519,7 @@
         el.dataset.id = conv.id;
         
         const platform = conv.meta?.platform || "AI Page";
-        const dateStr = new Date(conv.created_at).toLocaleDateString();
+        const dateStr = new Date(conv.started_at).toLocaleDateString();
 
         el.innerHTML = `
           <div class="conv-item-title">Conversation ${conv.id.substring(0, 8)}</div>

@@ -186,6 +186,21 @@ class AsyncMemoryIngestionPipeline:
                 session.add(new_conv)
                 await session.flush()
                 logger.info(f"Created new conversation session: {request.conversation_id}")
+            else:
+                # Update existing conversation metadata to ensure platform is stored
+                stmt = select(DbConversation).where(DbConversation.id == request.conversation_id)
+                res = await session.execute(stmt)
+                conv = res.scalar_one()
+                current_meta = dict(conv.meta or {})
+                updated = False
+                for k, v in (request.metadata or {}).items():
+                    if k not in current_meta or current_meta[k] != v:
+                        current_meta[k] = v
+                        updated = True
+                if updated:
+                    conv.meta = current_meta
+                    session.add(conv)
+                    await session.flush()
 
             # Clear existing data for this conversation to prevent duplicate primary keys / foreign keys
             await session.execute(delete(Memory).where(Memory.conversation_id == request.conversation_id))

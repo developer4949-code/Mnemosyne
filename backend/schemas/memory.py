@@ -10,7 +10,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class MessageRole(str, Enum):
@@ -135,3 +135,35 @@ class MemoryIngestResult(BaseModel):
     memories: list[MemoryCandidate]
     relationships: list[KnowledgeRelationship]
     project_dna_patch: ProjectDnaPatch
+
+
+class MemoryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    project_id: str
+    conversation_id: str
+    chunk_id: str
+    kind: str
+    text: str
+    importance: float
+    confidence: float
+    source_message_ids: list[str]
+    attributes: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime
+    updated_at: datetime
+
+
+class KnowledgeRelationshipResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    project_id: str
+    conversation_id: str | None = None
+    source: str
+    relation: str
+    target: str
+    confidence: float
+    metadata: dict[str, Any] = Field(validation_alias="meta")
+    created_at: datetime
+    updated_at: datetime

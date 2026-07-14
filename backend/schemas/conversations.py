@@ -19,6 +19,16 @@ class ConversationCreateRequest(BaseModel):
     metadata: dict[str, object] = Field(default_factory=dict)
 
 
+class ConversationMessageResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    role: str
+    content: str
+    external_id: str | None = None
+    created_at: datetime | None = None
+    metadata: dict[str, object] = Field(validation_alias="meta")
+
+
 class ConversationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -28,11 +38,4 @@ class ConversationResponse(BaseModel):
     metadata: dict[str, object] = Field(validation_alias="meta")
     started_at: datetime
     ended_at: datetime | None = None
-
-
-class ConversationMessageResponse(BaseModel):
-    role: str
-    content: str
-    external_id: str | None = None
-    created_at: datetime | None = None
-    metadata: dict[str, object] = Field(validation_alias="meta")
+    messages: list[ConversationMessageResponse] | None = None

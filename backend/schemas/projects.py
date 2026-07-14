@@ -4,6 +4,7 @@ schemas/projects.py
 Project and project DNA API contracts.
 """
 
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -28,6 +29,7 @@ class ProjectResponse(BaseModel):
     owner_id: int
     metadata: dict[str, object] = Field(validation_alias="meta")
     is_active: bool
+    created_at: datetime
 
 
 class ProjectDnaResponse(BaseModel):

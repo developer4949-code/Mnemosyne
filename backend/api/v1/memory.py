@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, status
 
 from core.auth import get_current_user
 from core.config import settings
-from schemas.memory import MemoryIngestRequest, MemoryIngestResult
+from schemas.memory import MemoryIngestRequest, MemoryIngestResult, MemoryResponse, KnowledgeRelationshipResponse
 from schemas.response import SuccessResponse, success
 from services.memory import MemoryService, get_memory_service
 
@@ -42,12 +42,13 @@ async def ingest_conversation(
 @router.get(
     "/project/{project_id}",
     summary="List all memories for a project",
+    response_model=SuccessResponse[list[MemoryResponse]],
 )
 async def list_project_memories(
     project_id: str,
     _: CurrentUserDep,
     memory_service: MemoryServiceDep,
-):
+) -> SuccessResponse[list[MemoryResponse]]:
     result = await memory_service.list_project_memories(project_id)
     return success(
         message="Project memories retrieved.",
@@ -59,12 +60,13 @@ async def list_project_memories(
 @router.get(
     "/project/{project_id}/relationships",
     summary="List all knowledge relationships for a project",
+    response_model=SuccessResponse[list[KnowledgeRelationshipResponse]],
 )
 async def list_project_relationships(
     project_id: str,
     _: CurrentUserDep,
     memory_service: MemoryServiceDep,
-):
+) -> SuccessResponse[list[KnowledgeRelationshipResponse]]:
     result = await memory_service.list_project_relationships(project_id)
     return success(
         message="Project relationships retrieved.",

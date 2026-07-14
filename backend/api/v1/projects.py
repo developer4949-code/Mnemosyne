@@ -93,3 +93,29 @@ async def get_project_dna(
         data=response,
         version=settings.app_version,
     )
+
+
+@router.delete(
+    "/{project_id}",
+    response_model=SuccessResponse[bool],
+    status_code=status.HTTP_200_OK,
+)
+async def delete_project(
+    project_id: str,
+    current_user: CurrentUserDep,
+    project_service: ProjectServiceDep,
+) -> SuccessResponse[bool]:
+    project = await project_service.get_project(project_id)
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
+    if project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to delete this project."
+        )
+    success_deleted = await project_service.delete_project(project_id)
+    return success(
+        message="Project deleted successfully.",
+        data=success_deleted,
+        version=settings.app_version,
+    )

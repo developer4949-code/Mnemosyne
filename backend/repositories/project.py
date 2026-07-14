@@ -56,3 +56,36 @@ class ProjectRepository:
         await self._session.commit()
         await self._session.refresh(existing)
         return existing
+
+    async def delete(self, project_id: str) -> bool:
+        from sqlalchemy import delete
+        from models.memory import Memory
+        from models.relationship import KnowledgeRelationship
+        from models.chunk import Chunk
+        from models.message import Message
+        from models.conversation import Conversation
+        from models.project_dna import ProjectDna
+        from models.project import Project
+
+        # 1. Delete memories
+        await self._session.execute(delete(Memory).where(Memory.project_id == project_id))
+        # 2. Delete relationships
+        await self._session.execute(delete(KnowledgeRelationship).where(KnowledgeRelationship.project_id == project_id))
+        # 3. Delete chunks
+        await self._session.execute(delete(Chunk).where(Chunk.project_id == project_id))
+        # 4. Delete messages
+        await self._session.execute(
+            delete(Message).where(
+                Message.conversation_id.in_(
+                    select(Conversation.id).where(Conversation.project_id == project_id)
+                )
+            )
+        )
+        # 5. Delete conversations
+        await self._session.execute(delete(Conversation).where(Conversation.project_id == project_id))
+        # 6. Delete project DNA
+        await self._session.execute(delete(ProjectDna).where(ProjectDna.project_id == project_id))
+        # 7. Delete the project itself
+        result = await self._session.execute(delete(Project).where(Project.id == project_id))
+        await self._session.commit()
+        return result.rowcount > 0
