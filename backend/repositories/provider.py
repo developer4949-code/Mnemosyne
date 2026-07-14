@@ -15,7 +15,11 @@ class ProviderConfigRepository:
         self._session = session
 
     async def list_enabled(self) -> list[ProviderConfig]:
-        statement = select(ProviderConfig).where(ProviderConfig.enabled.is_(True)).order_by(ProviderConfig.priority.asc())
+        statement = (
+            select(ProviderConfig)
+            .where(ProviderConfig.enabled.is_(True))
+            .order_by(ProviderConfig.priority.asc())
+        )
         result = await self._session.execute(statement)
         return result.scalars().all()
 

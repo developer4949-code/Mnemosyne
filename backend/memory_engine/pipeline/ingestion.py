@@ -44,7 +44,12 @@ class MemoryIngestionPipeline:
             for fact in facts:
                 memories.append(
                     MemoryCandidate(
-                        id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{chunk.id}:{fact.kind}:{fact.text}")),
+                        id=str(
+                            uuid.uuid5(
+                                uuid.NAMESPACE_URL,
+                                f"{chunk.id}:{fact.kind}:{fact.text}",
+                            )
+                        ),
                         project_id=request.project_id,
                         conversation_id=request.conversation_id,
                         chunk_id=chunk.id,

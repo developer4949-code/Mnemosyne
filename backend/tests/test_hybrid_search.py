@@ -10,10 +10,13 @@ from services.search import RetrievalService
 async def test_hybrid_search_rrf() -> None:
     session = MagicMock()
 
-    with patch("services.search.MemoryRepository") as mock_repo_cls, \
-         patch("repositories.provider.ProviderConfigRepository") as mock_provider_repo_cls, \
-         patch("services.search.QdrantVectorStore") as mock_vector_cls:
-
+    with (
+        patch("services.search.MemoryRepository") as mock_repo_cls,
+        patch(
+            "repositories.provider.ProviderConfigRepository"
+        ) as mock_provider_repo_cls,
+        patch("services.search.QdrantVectorStore") as mock_vector_cls,
+    ):
         mock_repo = mock_repo_cls.return_value
         mock_provider_repo = mock_provider_repo_cls.return_value
         mock_provider_repo.list_enabled = AsyncMock(return_value=[])
@@ -73,7 +76,9 @@ async def test_hybrid_search_rrf() -> None:
         db_mem2.source_message_ids = []
         db_mem2.attributes = {}
 
-        mock_repo.search_memories_by_keyword = AsyncMock(return_value=[db_mem1, db_mem2])
+        mock_repo.search_memories_by_keyword = AsyncMock(
+            return_value=[db_mem1, db_mem2]
+        )
 
         service = RetrievalService(session)
         req = RetrievalRequest(project_id="proj-1", query="test query", top_k=5)

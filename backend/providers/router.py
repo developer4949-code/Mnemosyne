@@ -34,13 +34,17 @@ class ProviderRouter:
     """Choose the best available provider, with automatic failover."""
 
     def __init__(self, configs: Iterable[ProviderConfigResponse]) -> None:
-        self._adapters = [self._create_adapter(config) for config in configs if config.enabled]
+        self._adapters = [
+            self._create_adapter(config) for config in configs if config.enabled
+        ]
 
     def _create_adapter(self, config: ProviderConfigResponse) -> ProviderAdapter:
         adapter_cls = _PROVIDER_MAP.get(config.name.lower())
         if adapter_cls is None:
             raise ValueError(f"Unknown provider {config.name}")
-        return adapter_cls(endpoint=config.endpoint, api_key=config.api_key, metadata=config.metadata)
+        return adapter_cls(
+            endpoint=config.endpoint, api_key=config.api_key, metadata=config.metadata
+        )
 
     async def embed(self, texts: list[str]) -> list[list[float]]:
         if not texts:
@@ -52,7 +56,9 @@ class ProviderRouter:
                 return await adapter.embed(texts)
             except Exception as exc:
                 last_error = exc
-                logger.warning("Provider %s failed: %s", type(adapter).__name__, str(exc))
+                logger.warning(
+                    "Provider %s failed: %s", type(adapter).__name__, str(exc)
+                )
                 continue
 
         if last_error:
@@ -67,7 +73,9 @@ class ProviderRouter:
                 return await adapter.complete(prompt)
             except Exception as exc:
                 last_error = exc
-                logger.warning("Provider %s failed: %s", type(adapter).__name__, str(exc))
+                logger.warning(
+                    "Provider %s failed: %s", type(adapter).__name__, str(exc)
+                )
                 continue
 
         if last_error:

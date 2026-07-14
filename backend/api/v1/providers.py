@@ -10,8 +10,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from core.auth import get_current_user
 from core.config import settings
-from schemas.providers import (ProviderConfigCreateRequest, ProviderConfigResponse,
-                               ProviderConfigUpdateRequest, ProviderHealthResponse)
+from schemas.providers import (
+    ProviderConfigCreateRequest,
+    ProviderConfigResponse,
+    ProviderConfigUpdateRequest,
+    ProviderHealthResponse,
+)
 from schemas.response import SuccessResponse, success
 from services.providers import ProviderService, get_provider_service
 
@@ -65,7 +69,9 @@ async def get_provider(
 ) -> SuccessResponse[ProviderConfigResponse]:
     config = await provider_service.get_provider(name)
     if config is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found."
+        )
     return success(
         message="Provider configuration retrieved.",
         data=config,

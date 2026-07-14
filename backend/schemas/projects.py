@@ -43,4 +43,3 @@ class ProjectDnaResponse(BaseModel):
     fixes: list[str]
     file_references: list[str]
     dependencies: list[str]
-

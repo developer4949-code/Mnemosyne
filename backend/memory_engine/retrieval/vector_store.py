@@ -7,7 +7,6 @@ Client wrapper for Qdrant vector persistence and search.
 from __future__ import annotations
 
 import asyncio
-from typing import Iterable
 
 from qdrant_client import QdrantClient
 from qdrant_client.http import models as rest
@@ -22,7 +21,9 @@ class QdrantVectorStore:
     COLLECTION_NAME = "mnemosyne_memories"
 
     def __init__(self) -> None:
-        self._client = QdrantClient(url=settings.qdrant_url, api_key=settings.qdrant_api_key or None)
+        self._client = QdrantClient(
+            url=settings.qdrant_url, api_key=settings.qdrant_api_key or None
+        )
         self._ensure_collection()
 
     def _ensure_collection(self) -> None:
@@ -36,16 +37,20 @@ class QdrantVectorStore:
                 current_size = info.config.params.vectors.size
             elif isinstance(info.config.params.vectors, dict):
                 current_size = info.config.params.vectors.get("size", 0)
-            
+
             if current_size != target_size:
                 self._client.recreate_collection(
                     collection_name=self.COLLECTION_NAME,
-                    vectors_config=rest.VectorParams(size=target_size, distance=rest.Distance.COSINE),
+                    vectors_config=rest.VectorParams(
+                        size=target_size, distance=rest.Distance.COSINE
+                    ),
                 )
         except Exception:
             self._client.recreate_collection(
                 collection_name=self.COLLECTION_NAME,
-                vectors_config=rest.VectorParams(size=target_size, distance=rest.Distance.COSINE),
+                vectors_config=rest.VectorParams(
+                    size=target_size, distance=rest.Distance.COSINE
+                ),
             )
 
     async def upsert_memories(self, memories: list[MemoryCandidate]) -> None:

@@ -25,8 +25,10 @@ class RetrievalService:
 
         provider_repo = ProviderConfigRepository(self._repo._session)
         enabled_configs = await provider_repo.list_enabled()
-        router_configs = [ProviderConfigResponse.model_validate(c) for c in enabled_configs]
-        
+        router_configs = [
+            ProviderConfigResponse.model_validate(c) for c in enabled_configs
+        ]
+
         query_embedding = []
         if router_configs:
             try:
@@ -40,21 +42,18 @@ class RetrievalService:
         if not query_embedding:
             # Fallback to local hashing of dimension 384 (matching Qdrant collection)
             from memory_engine.embeddings.hashing import HashingEmbeddingProvider
+
             hashing_embedder = HashingEmbeddingProvider(dimensions=384)
             query_embedding = hashing_embedder.embed(request.query)
 
         # 1. Fetch from Vector Store (project-scoped)
         vector_candidates = await self._vector_store.search(
-            query_embedding,
-            project_id=request.project_id,
-            top_k=request.top_k * 2
+            query_embedding, project_id=request.project_id, top_k=request.top_k * 2
         )
 
         # 2. Fetch from DB Keyword Search (project-scoped)
         keyword_memories = await self._repo.search_memories_by_keyword(
-            project_id=request.project_id,
-            query=request.query,
-            limit=request.top_k * 2
+            project_id=request.project_id, query=request.query, limit=request.top_k * 2
         )
 
         # Map both sources to a unified collection of memories
@@ -69,7 +68,9 @@ class RetrievalService:
                     project_id=memory.project_id,
                     conversation_id=memory.conversation_id or "",
                     chunk_id=memory.chunk_id or "",
-                    kind=MemoryKind(memory.kind) if isinstance(memory.kind, str) else memory.kind,
+                    kind=MemoryKind(memory.kind)
+                    if isinstance(memory.kind, str)
+                    else memory.kind,
                     text=memory.text,
                     importance=memory.importance,
                     confidence=memory.confidence,
@@ -90,14 +91,17 @@ class RetrievalService:
             rrf_scores[memory.id] = rrf_scores.get(memory.id, 0.0) + (1.0 / (k + rank))
 
         # Sort keys by RRF score descending
-        sorted_ids = sorted(rrf_scores.keys(), key=lambda x: rrf_scores[x], reverse=True)
-        final_candidates = [unified_memories[mid] for mid in sorted_ids[:request.top_k]]
+        sorted_ids = sorted(
+            rrf_scores.keys(), key=lambda x: rrf_scores[x], reverse=True
+        )
+        final_candidates = [
+            unified_memories[mid] for mid in sorted_ids[: request.top_k]
+        ]
 
         # Fallback: if no search matches are found, retrieve top general project memories
         if not final_candidates:
             fallback_memories = await self._repo.list_top_memories_for_project(
-                request.project_id,
-                limit=request.top_k
+                request.project_id, limit=request.top_k
             )
             final_candidates = [
                 MemoryCandidate(
@@ -105,7 +109,9 @@ class RetrievalService:
                     project_id=mem.project_id,
                     conversation_id=mem.conversation_id or "",
                     chunk_id=mem.chunk_id or "",
-                    kind=MemoryKind(mem.kind) if isinstance(mem.kind, str) else mem.kind,
+                    kind=MemoryKind(mem.kind)
+                    if isinstance(mem.kind, str)
+                    else mem.kind,
                     text=mem.text,
                     importance=mem.importance,
                     confidence=mem.confidence,
@@ -120,7 +126,9 @@ class RetrievalService:
         references = [
             MemoryReference(
                 id=cand.id,
-                kind=cand.kind.value if isinstance(cand.kind, MemoryKind) else str(cand.kind),
+                kind=cand.kind.value
+                if isinstance(cand.kind, MemoryKind)
+                else str(cand.kind),
                 text=cand.text,
                 importance=cand.importance,
                 confidence=cand.confidence,

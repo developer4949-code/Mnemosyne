@@ -6,7 +6,6 @@ Unit tests for core/security.py — password hashing and JWT utilities.
 
 from __future__ import annotations
 
-import time
 
 import pytest
 from jose import JWTError

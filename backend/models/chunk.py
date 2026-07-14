@@ -15,7 +15,9 @@ class Chunk(Base, TimestampMixin):
 
     id: Mapped[str] = mapped_column(String(128), primary_key=True)
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), nullable=False)
-    conversation_id: Mapped[str] = mapped_column(ForeignKey("conversations.id"), nullable=False)
+    conversation_id: Mapped[str] = mapped_column(
+        ForeignKey("conversations.id"), nullable=False
+    )
     text: Mapped[str] = mapped_column(Text, nullable=False)
     message_roles: Mapped[list[str]] = mapped_column(JSON, default=list)
     source_message_ids: Mapped[list[str]] = mapped_column(JSON, default=list)

@@ -108,10 +108,7 @@ class ContextBuilder:
         Returns:
             A ``BuiltContext`` instance ready for injection into a prompt.
         """
-        filtered = [
-            m for m in memories
-            if m.importance >= self._min_importance
-        ]
+        filtered = [m for m in memories if m.importance >= self._min_importance]
 
         # Group by kind
         by_kind: dict[MemoryKind, list[str]] = {kind: [] for kind in MemoryKind}

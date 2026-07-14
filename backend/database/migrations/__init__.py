@@ -1,1 +1,1 @@
-﻿# database\migrations
+# database\migrations

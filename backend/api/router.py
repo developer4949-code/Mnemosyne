@@ -18,7 +18,16 @@ Nothing else changes.
 
 from fastapi import APIRouter
 
-from api.v1 import auth, conversations, health, memory, providers, projects, retrieval, evaluation
+from api.v1 import (
+    auth,
+    conversations,
+    health,
+    memory,
+    providers,
+    projects,
+    retrieval,
+    evaluation,
+)
 
 # ─────────────────────────────────────────────
 # V1 sub-router
@@ -28,7 +37,9 @@ v1_router = APIRouter()
 
 v1_router.include_router(auth.router, prefix="/auth", tags=["Auth"])
 v1_router.include_router(projects.router, prefix="/projects", tags=["Projects"])
-v1_router.include_router(conversations.router, prefix="/conversations", tags=["Conversations"])
+v1_router.include_router(
+    conversations.router, prefix="/conversations", tags=["Conversations"]
+)
 v1_router.include_router(memory.router, prefix="/memory", tags=["Memory"])
 v1_router.include_router(retrieval.router, prefix="/retrieval", tags=["Retrieval"])
 v1_router.include_router(providers.router, prefix="/providers", tags=["Providers"])

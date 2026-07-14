@@ -42,8 +42,12 @@ class HuggingFaceProvider(ProviderAdapter):
             api_key=api_key or settings.hf_token,
             metadata=metadata or {},
         )
-        self._chat_model: str = str(self.metadata.get("chat_model", _DEFAULT_CHAT_MODEL))
-        self._embed_model: str = str(self.metadata.get("embed_model", _DEFAULT_EMBED_MODEL))
+        self._chat_model: str = str(
+            self.metadata.get("chat_model", _DEFAULT_CHAT_MODEL)
+        )
+        self._embed_model: str = str(
+            self.metadata.get("embed_model", _DEFAULT_EMBED_MODEL)
+        )
         self._timeout = int(self.metadata.get("timeout", HTTP_CLIENT_TIMEOUT))
 
     def _headers(self) -> dict[str, str]:

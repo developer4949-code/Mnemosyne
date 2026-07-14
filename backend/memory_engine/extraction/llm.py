@@ -24,7 +24,9 @@ class LlmKnowledgeExtractor:
     def __init__(self, router: ProviderRouter) -> None:
         self._router = router
 
-    async def extract(self, chunk: TextChunk) -> tuple[list[KnowledgeFact], list[KnowledgeRelationship]]:
+    async def extract(
+        self, chunk: TextChunk
+    ) -> tuple[list[KnowledgeFact], list[KnowledgeRelationship]]:
         """
         Query LLM to extract structured facts and relationships from a conversation chunk.
         """
@@ -59,7 +61,7 @@ Return ONLY valid raw JSON. Do not include markdown code block formatting or exp
 """
         try:
             response_text = await self._router.complete(prompt)
-            
+
             # Clean up response text if wrapped in markdown code blocks
             cleaned = response_text.strip()
             if cleaned.startswith("```"):
@@ -89,7 +91,9 @@ Return ONLY valid raw JSON. Do not include markdown code block formatting or exp
                         )
                     )
                 except Exception as err:
-                    logger.warning("Failed to parse LLM extracted fact: {} Error: {}", f, err)
+                    logger.warning(
+                        "Failed to parse LLM extracted fact: {} Error: {}", f, err
+                    )
 
             for r in data.get("relationships", []):
                 try:
@@ -102,7 +106,11 @@ Return ONLY valid raw JSON. Do not include markdown code block formatting or exp
                         )
                     )
                 except Exception as err:
-                    logger.warning("Failed to parse LLM extracted relationship: {} Error: {}", r, err)
+                    logger.warning(
+                        "Failed to parse LLM extracted relationship: {} Error: {}",
+                        r,
+                        err,
+                    )
 
             return facts, relationships
 

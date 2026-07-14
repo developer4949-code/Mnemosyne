@@ -15,7 +15,6 @@ Environment precedence (highest → lowest):
 """
 
 from functools import lru_cache
-from typing import List
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -36,7 +35,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=False,
-        extra="ignore",   # silently discard unknown env vars
+        extra="ignore",  # silently discard unknown env vars
     )
 
     # ─────────────────────────────────────────────
@@ -59,9 +58,7 @@ class Settings(BaseSettings):
     # Security
     # ─────────────────────────────────────────────
     secret_key: str = Field(default="CHANGE_ME_IN_PRODUCTION")
-    allowed_origins: str = Field(
-        default="http://localhost:3000,http://localhost:5173"
-    )
+    allowed_origins: str = Field(default="http://localhost:3000,http://localhost:5173")
     allowed_hosts: str = Field(default="*")
 
     # ─────────────────────────────────────────────
@@ -94,7 +91,7 @@ class Settings(BaseSettings):
     # Logging
     # ─────────────────────────────────────────────
     log_level: str = Field(default="DEBUG")
-    log_format: str = Field(default="text")   # "text" | "json"
+    log_format: str = Field(default="text")  # "text" | "json"
     log_file_path: str = Field(default="logs/mnemosyne.log")
 
     # ─────────────────────────────────────────────

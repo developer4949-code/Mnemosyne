@@ -6,14 +6,17 @@ Unit tests for the in-memory Knowledge Graph.
 
 from __future__ import annotations
 
-import pytest
 
 from memory_engine.graph.builder import KnowledgeGraph
 from schemas.memory import KnowledgeRelationship
 
 
-def _rel(source: str, relation: str, target: str, confidence: float = 0.8) -> KnowledgeRelationship:
-    return KnowledgeRelationship(source=source, relation=relation, target=target, confidence=confidence)
+def _rel(
+    source: str, relation: str, target: str, confidence: float = 0.8
+) -> KnowledgeRelationship:
+    return KnowledgeRelationship(
+        source=source, relation=relation, target=target, confidence=confidence
+    )
 
 
 class TestKnowledgeGraph:
@@ -77,10 +80,12 @@ class TestKnowledgeGraph:
 
     def test_serialisation_roundtrip(self) -> None:
         graph = KnowledgeGraph()
-        graph.add_relationships([
-            _rel("api", "uses", "db"),
-            _rel("db", "stores", "memories"),
-        ])
+        graph.add_relationships(
+            [
+                _rel("api", "uses", "db"),
+                _rel("db", "stores", "memories"),
+            ]
+        )
         serialised = graph.to_dict()
         restored = KnowledgeGraph.from_dict(serialised)
         assert restored.edge_count == graph.edge_count
@@ -95,7 +100,7 @@ class TestKnowledgeGraph:
 
     def test_bulk_add(self) -> None:
         graph = KnowledgeGraph()
-        rels = [_rel(f"node{i}", "x", f"node{i+1}") for i in range(5)]
+        rels = [_rel(f"node{i}", "x", f"node{i + 1}") for i in range(5)]
         graph.add_relationships(rels)
         assert graph.edge_count == 5
 

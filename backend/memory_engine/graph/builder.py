@@ -164,7 +164,4 @@ class KnowledgeGraph:
         return graph
 
     def __repr__(self) -> str:
-        return (
-            f"KnowledgeGraph(nodes={len(self.all_nodes())}, "
-            f"edges={self.edge_count})"
-        )
+        return f"KnowledgeGraph(nodes={len(self.all_nodes())}, edges={self.edge_count})"

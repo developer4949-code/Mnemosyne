@@ -4,7 +4,7 @@ repositories/project.py
 Data access for projects and project DNA.
 """
 
-from sqlalchemy import select, update
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.project import Project
@@ -34,7 +34,9 @@ class ProjectRepository:
         return project
 
     async def list_for_owner(self, owner_id: int) -> list[Project]:
-        statement = select(Project).where(Project.owner_id == owner_id).order_by(Project.name)
+        statement = (
+            select(Project).where(Project.owner_id == owner_id).order_by(Project.name)
+        )
         result = await self._session.execute(statement)
         return result.scalars().all()
 
@@ -68,9 +70,15 @@ class ProjectRepository:
         from models.project import Project
 
         # 1. Delete memories
-        await self._session.execute(delete(Memory).where(Memory.project_id == project_id))
+        await self._session.execute(
+            delete(Memory).where(Memory.project_id == project_id)
+        )
         # 2. Delete relationships
-        await self._session.execute(delete(KnowledgeRelationship).where(KnowledgeRelationship.project_id == project_id))
+        await self._session.execute(
+            delete(KnowledgeRelationship).where(
+                KnowledgeRelationship.project_id == project_id
+            )
+        )
         # 3. Delete chunks
         await self._session.execute(delete(Chunk).where(Chunk.project_id == project_id))
         # 4. Delete messages
@@ -82,10 +90,16 @@ class ProjectRepository:
             )
         )
         # 5. Delete conversations
-        await self._session.execute(delete(Conversation).where(Conversation.project_id == project_id))
+        await self._session.execute(
+            delete(Conversation).where(Conversation.project_id == project_id)
+        )
         # 6. Delete project DNA
-        await self._session.execute(delete(ProjectDna).where(ProjectDna.project_id == project_id))
+        await self._session.execute(
+            delete(ProjectDna).where(ProjectDna.project_id == project_id)
+        )
         # 7. Delete the project itself
-        result = await self._session.execute(delete(Project).where(Project.id == project_id))
+        result = await self._session.execute(
+            delete(Project).where(Project.id == project_id)
+        )
         await self._session.commit()
         return result.rowcount > 0

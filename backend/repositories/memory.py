@@ -4,7 +4,7 @@ repositories/memory.py
 Data access for extracted memories, chunks, and relationships.
 """
 
-from sqlalchemy import insert, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.chunk import Chunk
@@ -24,11 +24,15 @@ class MemoryRepository:
         self._session.add_all(memories)
         await self._session.commit()
 
-    async def bulk_insert_relationships(self, relationships: list[KnowledgeRelationship]) -> None:
+    async def bulk_insert_relationships(
+        self, relationships: list[KnowledgeRelationship]
+    ) -> None:
         self._session.add_all(relationships)
         await self._session.commit()
 
-    async def list_top_memories_for_project(self, project_id: str, limit: int = 5) -> list[Memory]:
+    async def list_top_memories_for_project(
+        self, project_id: str, limit: int = 5
+    ) -> list[Memory]:
         statement = (
             select(Memory)
             .where(Memory.project_id == project_id)
@@ -38,20 +42,21 @@ class MemoryRepository:
         result = await self._session.execute(statement)
         return result.scalars().all()
 
-    async def search_memories_by_keyword(self, project_id: str, query: str, limit: int = 10) -> list[Memory]:
+    async def search_memories_by_keyword(
+        self, project_id: str, query: str, limit: int = 10
+    ) -> list[Memory]:
         statement = (
             select(Memory)
-            .where(
-                Memory.project_id == project_id,
-                Memory.text.ilike(f"%{query}%")
-            )
+            .where(Memory.project_id == project_id, Memory.text.ilike(f"%{query}%"))
             .order_by(Memory.importance.desc(), Memory.confidence.desc())
             .limit(limit)
         )
         result = await self._session.execute(statement)
         return result.scalars().all()
 
-    async def list_all_memories_for_project(self, project_id: str, limit: int = 100) -> list[Memory]:
+    async def list_all_memories_for_project(
+        self, project_id: str, limit: int = 100
+    ) -> list[Memory]:
         statement = (
             select(Memory)
             .where(Memory.project_id == project_id)
@@ -61,7 +66,9 @@ class MemoryRepository:
         result = await self._session.execute(statement)
         return result.scalars().all()
 
-    async def list_relationships_for_project(self, project_id: str, limit: int = 100) -> list[KnowledgeRelationship]:
+    async def list_relationships_for_project(
+        self, project_id: str, limit: int = 100
+    ) -> list[KnowledgeRelationship]:
         statement = (
             select(KnowledgeRelationship)
             .where(KnowledgeRelationship.project_id == project_id)

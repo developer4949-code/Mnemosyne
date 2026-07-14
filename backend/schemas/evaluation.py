@@ -16,16 +16,22 @@ class EvaluationRequest(BaseModel):
     context: str = Field(min_length=1, description="The reconstructed context string.")
     references: list[str] = Field(
         default_factory=list,
-        description="Target/expected keywords or gold standard facts that should appear in the context."
+        description="Target/expected keywords or gold standard facts that should appear in the context.",
     )
 
 
 class EvaluationMetrics(BaseModel):
     """Calculated memory retrieval and structure quality metrics."""
 
-    retrieval_precision: float = Field(ge=0.0, le=1.0, description="Keyword overlap precision score.")
-    redundancy_ratio: float = Field(ge=0.0, le=1.0, description="Ratio of redundant lines in context.")
-    token_efficiency: float = Field(ge=0.0, le=1.0, description="Context density/budget utilization score.")
+    retrieval_precision: float = Field(
+        ge=0.0, le=1.0, description="Keyword overlap precision score."
+    )
+    redundancy_ratio: float = Field(
+        ge=0.0, le=1.0, description="Ratio of redundant lines in context."
+    )
+    token_efficiency: float = Field(
+        ge=0.0, le=1.0, description="Context density/budget utilization score."
+    )
 
 
 class EvaluationResult(BaseModel):

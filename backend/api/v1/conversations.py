@@ -11,11 +11,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from core.auth import get_current_user
 from core.config import settings
 from schemas.conversations import ConversationCreateRequest, ConversationResponse
-from schemas.response import APIResponse, ResponseMeta, SuccessResponse, success
+from schemas.response import SuccessResponse, success
 from services.conversation import ConversationService, get_conversation_service
 
 router = APIRouter()
-ConversationServiceDep = Annotated[ConversationService, Depends(get_conversation_service)]
+ConversationServiceDep = Annotated[
+    ConversationService, Depends(get_conversation_service)
+]
 CurrentUserDep = Annotated[object, Depends(get_current_user)]
 
 
@@ -47,7 +49,9 @@ async def get_conversation(
 ) -> SuccessResponse[ConversationResponse]:
     result = await conversation_service.get_conversation(conversation_id)
     if result is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found."
+        )
     return success(
         message="Conversation retrieved.",
         data=result,

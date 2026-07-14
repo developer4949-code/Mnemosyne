@@ -13,15 +13,16 @@ from database.session import get_db_session
 from models.conversation import Conversation
 from models.message import Message
 from repositories.conversation import ConversationRepository
-from schemas.conversations import (ConversationCreateRequest, ConversationMessageResponse,
-                                   ConversationResponse)
+from schemas.conversations import ConversationCreateRequest, ConversationResponse
 
 
 class ConversationService:
     def __init__(self, session: AsyncSession) -> None:
         self._repo = ConversationRepository(session)
 
-    async def create_conversation(self, request: ConversationCreateRequest) -> ConversationResponse:
+    async def create_conversation(
+        self, request: ConversationCreateRequest
+    ) -> ConversationResponse:
         conversation = Conversation(
             id=request.conversation_id,
             project_id=request.project_id,
@@ -43,9 +44,13 @@ class ConversationService:
 
         return ConversationResponse.model_validate(conversation)
 
-    async def get_conversation(self, conversation_id: str) -> ConversationResponse | None:
+    async def get_conversation(
+        self, conversation_id: str
+    ) -> ConversationResponse | None:
         conversation = await self._repo.get_by_id(conversation_id)
-        return ConversationResponse.model_validate(conversation) if conversation else None
+        return (
+            ConversationResponse.model_validate(conversation) if conversation else None
+        )
 
     async def list_conversations(self, project_id: str) -> list[ConversationResponse]:
         conversations = await self._repo.list_for_project(project_id)

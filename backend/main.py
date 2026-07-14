@@ -149,7 +149,11 @@ def _register_exception_handlers(app: FastAPI) -> None:
     async def unhandled_exception_handler(
         request: Request, exc: Exception
     ) -> JSONResponse:
-        logger.exception("Unhandled exception on {method} {path}", method=request.method, path=request.url.path)
+        logger.exception(
+            "Unhandled exception on {method} {path}",
+            method=request.method,
+            path=request.url.path,
+        )
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content=error(
@@ -171,9 +175,12 @@ def _register_routers(app: FastAPI) -> None:
     # Mount static files to serve the Web UI Dashboard
     import os
     from fastapi.staticfiles import StaticFiles
+
     if not os.path.exists("static"):
         os.makedirs("static", exist_ok=True)
-    app.mount("/dashboard", StaticFiles(directory="static", html=True), name="dashboard")
+    app.mount(
+        "/dashboard", StaticFiles(directory="static", html=True), name="dashboard"
+    )
 
     # Root redirect to docs (development only)
     @app.get("/", include_in_schema=False)

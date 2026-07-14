@@ -27,7 +27,11 @@ class ConversationRepository:
         return conversation
 
     async def list_for_project(self, project_id: str) -> list[Conversation]:
-        statement = select(Conversation).where(Conversation.project_id == project_id).order_by(Conversation.started_at.desc())
+        statement = (
+            select(Conversation)
+            .where(Conversation.project_id == project_id)
+            .order_by(Conversation.started_at.desc())
+        )
         result = await self._session.execute(statement)
         return result.scalars().all()
 

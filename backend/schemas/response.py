@@ -44,8 +44,12 @@ class ResponseMeta(BaseModel):
         default=None,
         description="UUID identifying this specific request (set by middleware)",
     )
-    version: str = Field(default="0.1.0", description="API version that served this request")
-    page: Optional[int] = Field(default=None, description="Current page (paginated responses only)")
+    version: str = Field(
+        default="0.1.0", description="API version that served this request"
+    )
+    page: Optional[int] = Field(
+        default=None, description="Current page (paginated responses only)"
+    )
     page_size: Optional[int] = Field(default=None, description="Items per page")
     total: Optional[int] = Field(default=None, description="Total items available")
 

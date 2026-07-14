@@ -10,9 +10,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from core.auth import get_current_user
 from core.config import settings
-from schemas.projects import (ProjectCreateRequest, ProjectDnaResponse,
-                              ProjectResponse, ProjectUpdateRequest)
-from schemas.response import APIResponse, ResponseMeta, SuccessResponse, success
+from schemas.projects import (
+    ProjectCreateRequest,
+    ProjectDnaResponse,
+    ProjectResponse,
+    ProjectUpdateRequest,
+)
+from schemas.response import SuccessResponse, success
 from services.project import ProjectService, get_project_service
 
 router = APIRouter()
@@ -87,7 +91,9 @@ async def get_project_dna(
 ) -> SuccessResponse[ProjectDnaResponse]:
     response = await project_service.get_project_dna(project_id)
     if response is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project DNA not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project DNA not found."
+        )
     return success(
         message="Project DNA retrieved.",
         data=response,
@@ -107,11 +113,13 @@ async def delete_project(
 ) -> SuccessResponse[bool]:
     project = await project_service.get_project(project_id)
     if not project:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Project not found."
+        )
     if project.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to delete this project."
+            detail="You do not have permission to delete this project.",
         )
     success_deleted = await project_service.delete_project(project_id)
     return success(

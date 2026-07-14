@@ -1,1 +1,1 @@
-﻿# memory_engine\embeddings
+# memory_engine\embeddings

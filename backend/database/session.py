@@ -33,8 +33,8 @@ engine: AsyncEngine = create_async_engine(
     settings.database_url,
     pool_size=settings.database_pool_size,
     max_overflow=settings.database_max_overflow,
-    echo=settings.debug,          # log SQL statements in debug mode
-    pool_pre_ping=True,           # drop stale connections transparently
+    echo=settings.debug,  # log SQL statements in debug mode
+    pool_pre_ping=True,  # drop stale connections transparently
     future=True,
 )
 

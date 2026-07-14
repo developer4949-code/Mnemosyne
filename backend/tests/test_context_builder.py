@@ -38,12 +38,20 @@ def _make_candidate(
 def sample_memories() -> list[MemoryCandidate]:
     return [
         _make_candidate(MemoryKind.DECISION, "Use FastAPI for the backend REST API."),
-        _make_candidate(MemoryKind.REQUIREMENT, "The system must support JWT authentication."),
-        _make_candidate(MemoryKind.TODO, "Implement the Chrome extension content script."),
+        _make_candidate(
+            MemoryKind.REQUIREMENT, "The system must support JWT authentication."
+        ),
+        _make_candidate(
+            MemoryKind.TODO, "Implement the Chrome extension content script."
+        ),
         _make_candidate(MemoryKind.BUG, "Login endpoint returns 500 on missing email."),
-        _make_candidate(MemoryKind.ARCHITECTURE, "Memory engine uses Qdrant for vector storage."),
+        _make_candidate(
+            MemoryKind.ARCHITECTURE, "Memory engine uses Qdrant for vector storage."
+        ),
         _make_candidate(MemoryKind.DEPENDENCY, "fastapi", importance=0.5),
-        _make_candidate(MemoryKind.GENERAL, "This is general context.", importance=0.35),
+        _make_candidate(
+            MemoryKind.GENERAL, "This is general context.", importance=0.35
+        ),
     ]
 
 
@@ -75,7 +83,9 @@ class TestContextBuilder:
         result = builder.build("proj-test", "Mnemosyne", sample_memories)
         assert result.token_estimate > 0
 
-    def test_respects_token_budget(self, sample_memories: list[MemoryCandidate]) -> None:
+    def test_respects_token_budget(
+        self, sample_memories: list[MemoryCandidate]
+    ) -> None:
         builder = ContextBuilder(max_tokens=50)
         result = builder.build("proj-test", "Mnemosyne", sample_memories)
         assert result.token_estimate <= 60  # slight tolerance for header

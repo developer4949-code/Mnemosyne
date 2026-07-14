@@ -43,6 +43,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     try:
         from database.session import engine
         from sqlalchemy import text
+
         async with engine.connect() as conn:
             await conn.execute(text("SELECT 1"))
         logger.info("Database connection pool initialised successfully.")
@@ -58,6 +59,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     try:
         from database.session import engine
+
         await engine.dispose()
         logger.info("Database connection pool disposed.")
     except Exception as exc:

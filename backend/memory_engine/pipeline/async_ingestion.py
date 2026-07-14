@@ -14,21 +14,14 @@ from memory_engine.pipeline.ingestion import MemoryIngestionPipeline
 from memory_engine.retrieval.vector_store import QdrantVectorStore
 from models.chunk import Chunk
 from models.memory import Memory
-from models.project_dna import ProjectDna
 from models.relationship import KnowledgeRelationship
 from repositories.memory import MemoryRepository
 import uuid
 from loguru import logger
 
-from memory_engine.pipeline.ingestion import MemoryIngestionPipeline, _dedupe_memories, _dedupe_relationships
-from memory_engine.retrieval.vector_store import QdrantVectorStore
-from models.chunk import Chunk
-from models.memory import Memory
-from models.project_dna import ProjectDna
-from models.relationship import KnowledgeRelationship
-from repositories.memory import MemoryRepository
+from memory_engine.pipeline.ingestion import _dedupe_memories, _dedupe_relationships
 from repositories.project import ProjectRepository
-from schemas.memory import MemoryCandidate, MemoryIngestRequest, MemoryIngestResult, MemoryKind
+from schemas.memory import MemoryCandidate, MemoryIngestRequest, MemoryIngestResult
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,7 +46,9 @@ class AsyncMemoryIngestionPipeline:
         if self._repository is not None:
             provider_repo = ProviderConfigRepository(self._repository._session)
             enabled_configs = await provider_repo.list_enabled()
-            router_configs = [ProviderConfigResponse.model_validate(c) for c in enabled_configs]
+            router_configs = [
+                ProviderConfigResponse.model_validate(c) for c in enabled_configs
+            ]
             if router_configs:
                 router = ProviderRouter(router_configs)
 
@@ -61,19 +56,24 @@ class AsyncMemoryIngestionPipeline:
         if router is not None:
             from memory_engine.extraction.llm import LlmKnowledgeExtractor
             from memory_engine.ranking.importance import ImportanceScorer
-            
+
             logger.info("Executing second-pass LLM-enhanced knowledge extraction...")
             llm_extractor = LlmKnowledgeExtractor(router)
             scorer = ImportanceScorer()
 
             for chunk in result.chunks:
                 llm_facts, llm_rels = await llm_extractor.extract(chunk)
-                
+
                 # Merge LLM facts
                 for fact in llm_facts:
                     result.memories.append(
                         MemoryCandidate(
-                            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{chunk.id}:{fact.kind}:{fact.text}")),
+                            id=str(
+                                uuid.uuid5(
+                                    uuid.NAMESPACE_URL,
+                                    f"{chunk.id}:{fact.kind}:{fact.text}",
+                                )
+                            ),
                             project_id=request.project_id,
                             conversation_id=request.conversation_id,
                             chunk_id=chunk.id,
@@ -96,20 +96,27 @@ class AsyncMemoryIngestionPipeline:
         # 4. Generate embeddings in batch (size = 384)
         memories_text = [m.text for m in result.memories]
         embeddings = []
-        
+
         if router is not None and memories_text:
             try:
                 embeddings = await router.embed(memories_text)
-                logger.info(f"Generated {len(embeddings)} provider-backed embeddings of size {len(embeddings[0])}.")
+                logger.info(
+                    f"Generated {len(embeddings)} provider-backed embeddings of size {len(embeddings[0])}."
+                )
             except Exception as exc:
-                logger.error(f"Provider embedding failed: {exc}. Falling back to deterministic hashing.")
+                logger.error(
+                    f"Provider embedding failed: {exc}. Falling back to deterministic hashing."
+                )
 
         # Fallback to local hashing of size 384
         if not embeddings and memories_text:
             from memory_engine.embeddings.hashing import HashingEmbeddingProvider
+
             hashing_embedder = HashingEmbeddingProvider(dimensions=384)
             embeddings = [hashing_embedder.embed(text) for text in memories_text]
-            logger.info(f"Generated {len(embeddings)} fallback hashing embeddings of size 384.")
+            logger.info(
+                f"Generated {len(embeddings)} fallback hashing embeddings of size 384."
+            )
 
         # Assign embeddings back to candidate memories
         for memory, embedding in zip(result.memories, embeddings):
@@ -117,8 +124,11 @@ class AsyncMemoryIngestionPipeline:
 
         # Re-build DNA patch based on the deduplicated & enhanced memories
         from memory_engine.dna.patch import ProjectDnaPatchBuilder
+
         dna_builder = ProjectDnaPatchBuilder()
-        result.project_dna_patch = dna_builder.build(request.project_id, result.memories)
+        result.project_dna_patch = dna_builder.build(
+            request.project_id, result.memories
+        )
 
         # 5. Populate database models
         chunk_models = [
@@ -172,7 +182,9 @@ class AsyncMemoryIngestionPipeline:
             from sqlalchemy import delete, select
 
             # Check and create conversation if missing
-            stmt = select(DbConversation).where(DbConversation.id == request.conversation_id)
+            stmt = select(DbConversation).where(
+                DbConversation.id == request.conversation_id
+            )
             res = await session.execute(stmt)
             conversation_exists = res.scalar_one_or_none() is not None
 
@@ -180,15 +192,22 @@ class AsyncMemoryIngestionPipeline:
                 new_conv = DbConversation(
                     id=request.conversation_id,
                     project_id=request.project_id,
-                    title=request.metadata.get("source_url", f"Extension Session - {request.conversation_id[:8]}"),
+                    title=request.metadata.get(
+                        "source_url",
+                        f"Extension Session - {request.conversation_id[:8]}",
+                    ),
                     meta=request.metadata or {},
                 )
                 session.add(new_conv)
                 await session.flush()
-                logger.info(f"Created new conversation session: {request.conversation_id}")
+                logger.info(
+                    f"Created new conversation session: {request.conversation_id}"
+                )
             else:
                 # Update existing conversation metadata to ensure platform is stored
-                stmt = select(DbConversation).where(DbConversation.id == request.conversation_id)
+                stmt = select(DbConversation).where(
+                    DbConversation.id == request.conversation_id
+                )
                 res = await session.execute(stmt)
                 conv = res.scalar_one()
                 current_meta = dict(conv.meta or {})
@@ -203,10 +222,22 @@ class AsyncMemoryIngestionPipeline:
                     await session.flush()
 
             # Clear existing data for this conversation to prevent duplicate primary keys / foreign keys
-            await session.execute(delete(Memory).where(Memory.conversation_id == request.conversation_id))
-            await session.execute(delete(KnowledgeRelationship).where(KnowledgeRelationship.conversation_id == request.conversation_id))
-            await session.execute(delete(Chunk).where(Chunk.conversation_id == request.conversation_id))
-            await session.execute(delete(DbMessage).where(DbMessage.conversation_id == request.conversation_id))
+            await session.execute(
+                delete(Memory).where(Memory.conversation_id == request.conversation_id)
+            )
+            await session.execute(
+                delete(KnowledgeRelationship).where(
+                    KnowledgeRelationship.conversation_id == request.conversation_id
+                )
+            )
+            await session.execute(
+                delete(Chunk).where(Chunk.conversation_id == request.conversation_id)
+            )
+            await session.execute(
+                delete(DbMessage).where(
+                    DbMessage.conversation_id == request.conversation_id
+                )
+            )
             await session.flush()
 
             # Insert message models
@@ -228,7 +259,9 @@ class AsyncMemoryIngestionPipeline:
             await self._repository.bulk_insert_chunks(chunk_models)
             await self._repository.bulk_insert_memories(memory_models)
             await self._repository.bulk_insert_relationships(relationship_models)
-            await project_repo.upsert_dna(request.project_id, result.project_dna_patch.model_dump())
+            await project_repo.upsert_dna(
+                request.project_id, result.project_dna_patch.model_dump()
+            )
 
         if self._vector_store is not None:
             await self._vector_store.upsert_memories(result.memories)

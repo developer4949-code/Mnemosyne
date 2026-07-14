@@ -57,5 +57,5 @@ MAX_PAGE_SIZE: int = 100
 # Timeouts (seconds)
 # ─────────────────────────────────────────────────────────────────────────────
 
-HTTP_CLIENT_TIMEOUT: int = 30       # outbound calls to AI providers
-DATABASE_QUERY_TIMEOUT: int = 10    # per-query budget
+HTTP_CLIENT_TIMEOUT: int = 30  # outbound calls to AI providers
+DATABASE_QUERY_TIMEOUT: int = 10  # per-query budget

@@ -1,1 +1,1 @@
-﻿# memory_engine\ranking
+# memory_engine\ranking

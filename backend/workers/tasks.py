@@ -38,7 +38,11 @@ async def run_memory_ingestion(
         request:      The memory ingest payload.
         database_url: SQLAlchemy async database URL.
     """
-    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+    from sqlalchemy.ext.asyncio import (
+        AsyncSession,
+        async_sessionmaker,
+        create_async_engine,
+    )
 
     from memory_engine.pipeline.async_ingestion import AsyncMemoryIngestionPipeline
 
@@ -80,7 +84,11 @@ async def consolidate_project_dna(project_id: str, database_url: str) -> None:
     accurate even if individual ingest runs produced noisy data.
     """
     from sqlalchemy import select
-    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+    from sqlalchemy.ext.asyncio import (
+        AsyncSession,
+        async_sessionmaker,
+        create_async_engine,
+    )
 
     from memory_engine.dna.patch import ProjectDnaPatchBuilder
     from models.memory import Memory

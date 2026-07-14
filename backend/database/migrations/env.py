@@ -14,14 +14,14 @@ from database.base import Base
 # ─────────────────────────────────────────────────────────────────────────────
 # Import all ORM models so Alembic can detect them for autogenerate.
 # ─────────────────────────────────────────────────────────────────────────────
-import models.user          # noqa: F401
-import models.project       # noqa: F401
+import models.user  # noqa: F401
+import models.project  # noqa: F401
 import models.conversation  # noqa: F401
-import models.message       # noqa: F401
-import models.chunk         # noqa: F401
-import models.memory        # noqa: F401
+import models.message  # noqa: F401
+import models.chunk  # noqa: F401
+import models.memory  # noqa: F401
 import models.relationship  # noqa: F401
-import models.project_dna   # noqa: F401
+import models.project_dna  # noqa: F401
 import models.provider_config  # noqa: F401
 
 # this is the Alembic Config object, which provides
@@ -35,9 +35,11 @@ if config.config_file_name is not None:
 # add your model's MetaData object here for 'autogenerate' support
 target_metadata = Base.metadata
 
+
 def get_url():
     """Dynamically get the database URL from settings."""
     return settings.database_url
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -61,11 +63,13 @@ def run_migrations_offline() -> None:
     with context.begin_transaction():
         context.run_migrations()
 
+
 def do_run_migrations(connection: Connection) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
         context.run_migrations()
+
 
 async def run_async_migrations() -> None:
     """In this scenario we need to create an Engine
@@ -85,9 +89,11 @@ async def run_async_migrations() -> None:
 
     await connectable.dispose()
 
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode."""
     asyncio.run(run_async_migrations())
+
 
 if context.is_offline_mode():
     run_migrations_offline()

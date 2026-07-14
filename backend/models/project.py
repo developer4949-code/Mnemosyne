@@ -21,4 +21,6 @@ class Project(Base, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     owner = relationship("User", back_populates="projects", lazy="joined")
-    conversations = relationship("Conversation", back_populates="project", lazy="selectin")
+    conversations = relationship(
+        "Conversation", back_populates="project", lazy="selectin"
+    )

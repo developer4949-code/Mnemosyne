@@ -11,23 +11,58 @@ import re
 from schemas.memory import KnowledgeFact, KnowledgeRelationship, MemoryKind, TextChunk
 
 _SENTENCE_RE = re.compile(r"(?<=[.!?])\s+|\n+")
-_FILE_RE = re.compile(r"\b[\w./\\-]+\.(?:py|ts|tsx|js|jsx|md|json|yaml|yml|toml|sql|html|css)\b")
-_DEPENDENCY_RE = re.compile(r"\b(?:fastapi|sqlalchemy|redis|qdrant|postgres|postgresql|openai|anthropic|ollama|groq|gemini|react|vite|pydantic)\b", re.I)
+_FILE_RE = re.compile(
+    r"\b[\w./\\-]+\.(?:py|ts|tsx|js|jsx|md|json|yaml|yml|toml|sql|html|css)\b"
+)
+_DEPENDENCY_RE = re.compile(
+    r"\b(?:fastapi|sqlalchemy|redis|qdrant|postgres|postgresql|openai|anthropic|ollama|groq|gemini|react|vite|pydantic)\b",
+    re.I,
+)
 
 _KIND_PATTERNS: tuple[tuple[MemoryKind, re.Pattern[str]], ...] = (
-    (MemoryKind.REQUIREMENT, re.compile(r"\b(requirement|required|acceptance|must support|user should|system should)\b", re.I)),
-    (MemoryKind.DECISION, re.compile(r"\b(decided|decision|choose|chosen|use|using)\b", re.I)),
-    (MemoryKind.TODO, re.compile(r"\b(todo|next|pending|later|follow up|need to|needs to|implement)\b", re.I)),
-    (MemoryKind.BUG, re.compile(r"\b(bug|error|failure|failing|broken|regression|exception|issue)\b", re.I)),
-    (MemoryKind.FIX, re.compile(r"\b(fix|fixed|resolved|patch|repair|workaround)\b", re.I)),
-    (MemoryKind.ARCHITECTURE, re.compile(r"\b(architecture|pipeline|service|repository|adapter|provider|module|layer)\b", re.I)),
+    (
+        MemoryKind.REQUIREMENT,
+        re.compile(
+            r"\b(requirement|required|acceptance|must support|user should|system should)\b",
+            re.I,
+        ),
+    ),
+    (
+        MemoryKind.DECISION,
+        re.compile(r"\b(decided|decision|choose|chosen|use|using)\b", re.I),
+    ),
+    (
+        MemoryKind.TODO,
+        re.compile(
+            r"\b(todo|next|pending|later|follow up|need to|needs to|implement)\b", re.I
+        ),
+    ),
+    (
+        MemoryKind.BUG,
+        re.compile(
+            r"\b(bug|error|failure|failing|broken|regression|exception|issue)\b", re.I
+        ),
+    ),
+    (
+        MemoryKind.FIX,
+        re.compile(r"\b(fix|fixed|resolved|patch|repair|workaround)\b", re.I),
+    ),
+    (
+        MemoryKind.ARCHITECTURE,
+        re.compile(
+            r"\b(architecture|pipeline|service|repository|adapter|provider|module|layer)\b",
+            re.I,
+        ),
+    ),
 )
 
 
 class RuleBasedKnowledgeExtractor:
     """Extract facts and relationships without relying on provider calls."""
 
-    def extract(self, chunk: TextChunk) -> tuple[list[KnowledgeFact], list[KnowledgeRelationship]]:
+    def extract(
+        self, chunk: TextChunk
+    ) -> tuple[list[KnowledgeFact], list[KnowledgeRelationship]]:
         facts: list[KnowledgeFact] = []
         relationships: list[KnowledgeRelationship] = []
 
@@ -46,7 +81,9 @@ class RuleBasedKnowledgeExtractor:
                     )
                 )
 
-            for dependency in dict.fromkeys(match.group(0).lower() for match in _DEPENDENCY_RE.finditer(sentence)):
+            for dependency in dict.fromkeys(
+                match.group(0).lower() for match in _DEPENDENCY_RE.finditer(sentence)
+            ):
                 facts.append(
                     KnowledgeFact(
                         kind=MemoryKind.DEPENDENCY,
@@ -70,20 +107,30 @@ class RuleBasedKnowledgeExtractor:
                 )
 
         if len(sentence.split()) >= 8:
-            return KnowledgeFact(kind=MemoryKind.GENERAL, text=sentence, confidence=0.55)
+            return KnowledgeFact(
+                kind=MemoryKind.GENERAL, text=sentence, confidence=0.55
+            )
         return None
 
 
 def _split_sentences(text: str) -> list[str]:
-    return [part.strip(" -\t") for part in _SENTENCE_RE.split(text) if part.strip(" -\t")]
+    return [
+        part.strip(" -\t") for part in _SENTENCE_RE.split(text) if part.strip(" -\t")
+    ]
 
 
 def _extract_relationships(sentence: str) -> list[KnowledgeRelationship]:
     relationships: list[KnowledgeRelationship] = []
     relation_patterns = (
-        (re.compile(r"\b(.+?)\s+(?:depends on|requires)\s+(.+?)\b", re.I), "depends_on"),
+        (
+            re.compile(r"\b(.+?)\s+(?:depends on|requires)\s+(.+?)\b", re.I),
+            "depends_on",
+        ),
         (re.compile(r"\b(.+?)\s+(?:uses|using)\s+(.+?)\b", re.I), "uses"),
-        (re.compile(r"\b(.+?)\s+(?:updates|feeds|writes to)\s+(.+?)\b", re.I), "updates"),
+        (
+            re.compile(r"\b(.+?)\s+(?:updates|feeds|writes to)\s+(.+?)\b", re.I),
+            "updates",
+        ),
     )
     for pattern, relation in relation_patterns:
         match = pattern.search(sentence)

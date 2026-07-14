@@ -12,7 +12,9 @@ from schemas.memory import MemoryCandidate, MemoryKind, ProjectDnaPatch
 class ProjectDnaPatchBuilder:
     """Group high-value memories into the evolving Project DNA shape."""
 
-    def build(self, project_id: str, memories: list[MemoryCandidate]) -> ProjectDnaPatch:
+    def build(
+        self, project_id: str, memories: list[MemoryCandidate]
+    ) -> ProjectDnaPatch:
         patch = ProjectDnaPatch(project_id=project_id)
         for memory in memories:
             match memory.kind:

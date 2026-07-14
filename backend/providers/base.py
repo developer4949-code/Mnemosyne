@@ -10,7 +10,12 @@ from abc import ABC, abstractmethod
 
 
 class ProviderAdapter(ABC):
-    def __init__(self, endpoint: str | None, api_key: str | None, metadata: dict[str, object] | None = None) -> None:
+    def __init__(
+        self,
+        endpoint: str | None,
+        api_key: str | None,
+        metadata: dict[str, object] | None = None,
+    ) -> None:
         self.endpoint = endpoint
         self.api_key = api_key
         self.metadata = metadata or {}

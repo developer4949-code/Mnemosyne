@@ -6,7 +6,6 @@ Authentication use cases, user registration, and token generation.
 
 from __future__ import annotations
 
-from datetime import timedelta
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,7 +13,12 @@ from core.security import create_access_token, get_password_hash, verify_passwor
 from database.session import get_db_session
 from models.user import User
 from repositories.user import UserRepository
-from schemas.auth import AuthTokenResponse, UserLoginRequest, UserProfile, UserRegisterRequest
+from schemas.auth import (
+    AuthTokenResponse,
+    UserLoginRequest,
+    UserProfile,
+    UserRegisterRequest,
+)
 
 
 class AuthService:

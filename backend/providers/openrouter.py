@@ -41,7 +41,9 @@ class OpenRouterProvider(ProviderAdapter):
             api_key=api_key,
             metadata=metadata or {},
         )
-        self._chat_model: str = str(self.metadata.get("chat_model", _DEFAULT_CHAT_MODEL))
+        self._chat_model: str = str(
+            self.metadata.get("chat_model", _DEFAULT_CHAT_MODEL)
+        )
         self._timeout = int(self.metadata.get("timeout", HTTP_CLIENT_TIMEOUT))
 
     async def complete(self, prompt: str) -> str:
@@ -74,5 +76,6 @@ class OpenRouterProvider(ProviderAdapter):
     async def embed(self, texts: list[str]) -> list[list[float]]:
         """OpenRouter does not offer an embedding endpoint; use local fallback."""
         from memory_engine.embeddings.hashing import HashingEmbeddingProvider
+
         embedder = HashingEmbeddingProvider()
         return [embedder.embed(text) for text in texts]

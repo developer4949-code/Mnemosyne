@@ -42,8 +42,12 @@ class OllamaProvider(ProviderAdapter):
             api_key=api_key,
             metadata=metadata or {},
         )
-        self._chat_model: str = str(self.metadata.get("chat_model", _DEFAULT_CHAT_MODEL))
-        self._embed_model: str = str(self.metadata.get("embed_model", _DEFAULT_EMBED_MODEL))
+        self._chat_model: str = str(
+            self.metadata.get("chat_model", _DEFAULT_CHAT_MODEL)
+        )
+        self._embed_model: str = str(
+            self.metadata.get("embed_model", _DEFAULT_EMBED_MODEL)
+        )
         self._timeout = int(self.metadata.get("timeout", HTTP_CLIENT_TIMEOUT))
 
     async def complete(self, prompt: str) -> str:

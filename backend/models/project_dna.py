@@ -4,7 +4,7 @@ models/project_dna.py
 Project DNA stores persistent, aggregated project memory summaries.
 """
 
-from sqlalchemy import ForeignKey, JSON, String
+from sqlalchemy import ForeignKey, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.base import Base, TimestampMixin

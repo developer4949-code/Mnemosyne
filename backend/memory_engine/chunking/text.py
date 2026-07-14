@@ -38,7 +38,9 @@ class ConversationChunker:
             if buffer and token_count + next_count > self._max_tokens:
                 chunks.append(self._build_chunk(request, buffer, len(chunks)))
                 buffer = _overlap_tail(buffer, self._overlap_tokens)
-                token_count = sum(estimate_tokens(clean_text(item.content)) for item in buffer)
+                token_count = sum(
+                    estimate_tokens(clean_text(item.content)) for item in buffer
+                )
 
             buffer.append(message.model_copy(update={"content": cleaned}))
             token_count += next_count
@@ -54,13 +56,20 @@ class ConversationChunker:
         messages: list[ConversationMessage],
         index: int,
     ) -> TextChunk:
-        text = "\n".join(f"{message.role.value}: {message.content}" for message in messages)
+        text = "\n".join(
+            f"{message.role.value}: {message.content}" for message in messages
+        )
         source_ids = [
             message.external_id or f"{request.conversation_id}:{index}:{offset}"
             for offset, message in enumerate(messages)
         ]
         return TextChunk(
-            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{request.project_id}:{request.conversation_id}:{index}:{text}")),
+            id=str(
+                uuid.uuid5(
+                    uuid.NAMESPACE_URL,
+                    f"{request.project_id}:{request.conversation_id}:{index}:{text}",
+                )
+            ),
             project_id=request.project_id,
             conversation_id=request.conversation_id,
             text=text,

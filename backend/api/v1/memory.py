@@ -10,7 +10,12 @@ from fastapi import APIRouter, Depends, status
 
 from core.auth import get_current_user
 from core.config import settings
-from schemas.memory import MemoryIngestRequest, MemoryIngestResult, MemoryResponse, KnowledgeRelationshipResponse
+from schemas.memory import (
+    MemoryIngestRequest,
+    MemoryIngestResult,
+    MemoryResponse,
+    KnowledgeRelationshipResponse,
+)
 from schemas.response import SuccessResponse, success
 from services.memory import MemoryService, get_memory_service
 

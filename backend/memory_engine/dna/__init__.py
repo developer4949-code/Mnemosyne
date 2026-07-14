@@ -1,1 +1,1 @@
-﻿# memory_engine\dna
+# memory_engine\dna
