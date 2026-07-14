@@ -29,14 +29,17 @@ from core.config import settings
 # Engine
 # ─────────────────────────────────────────────────────────────────────────────
 
-engine: AsyncEngine = create_async_engine(
-    settings.database_url,
-    pool_size=settings.database_pool_size,
-    max_overflow=settings.database_max_overflow,
-    echo=settings.debug,  # log SQL statements in debug mode
-    pool_pre_ping=True,  # drop stale connections transparently
-    future=True,
-)
+engine_args = {
+    "echo": settings.debug,
+    "pool_pre_ping": True,
+    "future": True,
+}
+
+if not settings.database_url.startswith("sqlite"):
+    engine_args["pool_size"] = settings.database_pool_size
+    engine_args["max_overflow"] = settings.database_max_overflow
+
+engine: AsyncEngine = create_async_engine(settings.database_url, **engine_args)
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Session factory
