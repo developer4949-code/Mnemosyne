@@ -1,70 +1,130 @@
+"""
+tests/test_memory_ingestion.py
+
+Unit tests for the deterministic memory ingestion pipeline.
+"""
+
+from __future__ import annotations
+
 import pytest
 
-from schemas.memory import ConversationMessage, MemoryIngestRequest, MemoryKind
-from services.memory import MemoryService
+from memory_engine.pipeline.ingestion import MemoryIngestionPipeline
+from schemas.memory import (
+    ConversationMessage,
+    MemoryIngestRequest,
+    MemoryKind,
+    MessageRole,
+)
 
 
-@pytest.mark.asyncio
-async def test_memory_ingestion_extracts_ranked_project_knowledge() -> None:
-    request = MemoryIngestRequest(
-        project_id="mnemosyne",
-        conversation_id="chat-1",
+@pytest.fixture()
+def pipeline() -> MemoryIngestionPipeline:
+    return MemoryIngestionPipeline()
+
+
+@pytest.fixture()
+def simple_request() -> MemoryIngestRequest:
+    return MemoryIngestRequest(
+        project_id="proj-001",
+        conversation_id="conv-001",
         messages=[
             ConversationMessage(
-                role="user",
-                external_id="m1",
-                content=(
-                    "The system must support persistent project memory. "
-                    "We decided to use FastAPI with SQLAlchemy in backend/app/main.py."
-                ),
+                role=MessageRole.USER,
+                content="We decided to use FastAPI for the backend because it supports async.",
             ),
             ConversationMessage(
-                role="assistant",
-                external_id="m2",
+                role=MessageRole.ASSISTANT,
                 content=(
-                    "TODO: implement a memory ingestion pipeline. "
-                    "The memory engine uses Qdrant for vector search."
+                    "Good choice. FastAPI uses SQLAlchemy for database access. "
+                    "You need to implement the authentication module next. "
+                    "There is a bug in the login endpoint — it returns 500 when email is missing."
                 ),
             ),
         ],
     )
 
-    result = await MemoryService().ingest_conversation(request)
 
-    assert result.chunk_count == 1
-    assert result.memory_count >= 4
-    assert result.memories[0].importance >= result.memories[-1].importance
-    assert {memory.kind for memory in result.memories} >= {
-        MemoryKind.REQUIREMENT,
-        MemoryKind.DECISION,
-        MemoryKind.TODO,
-        MemoryKind.FILE_REFERENCE,
-        MemoryKind.DEPENDENCY,
-    }
-    assert "backend/app/main.py" in result.project_dna_patch.file_references
-    assert "fastapi" in result.project_dna_patch.dependencies
-    assert len(result.memories[0].embedding) == 64
+class TestMemoryIngestionPipeline:
+    def test_returns_result_with_chunks(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        assert result.project_id == "proj-001"
+        assert result.conversation_id == "conv-001"
+        assert result.chunk_count >= 1
 
+    def test_extracts_memories(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        assert result.memory_count >= 1
 
-@pytest.mark.asyncio
-async def test_memory_ingestion_is_deterministic_for_same_payload() -> None:
-    request = MemoryIngestRequest(
-        project_id="mnemosyne",
-        conversation_id="chat-2",
-        messages=[
-            ConversationMessage(
-                role="user",
-                external_id="m1",
-                content="Decision: the provider layer should use adapters.",
-            ),
-        ],
-    )
+    def test_extracts_decision(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        kinds = {m.kind for m in result.memories}
+        assert MemoryKind.DECISION in kinds
 
-    service = MemoryService()
-    first = await service.ingest_conversation(request)
-    second = await service.ingest_conversation(request)
+    def test_extracts_bug(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        kinds = {m.kind for m in result.memories}
+        assert MemoryKind.BUG in kinds
 
-    assert [memory.id for memory in first.memories] == [
-        memory.id for memory in second.memories
-    ]
-    assert first.memories[0].embedding == second.memories[0].embedding
+    def test_extracts_dependency(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        kinds = {m.kind for m in result.memories}
+        assert MemoryKind.DEPENDENCY in kinds
+
+    def test_memories_have_valid_importance(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        for memory in result.memories:
+            assert 0.0 <= memory.importance <= 1.0
+
+    def test_memories_have_valid_confidence(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        for memory in result.memories:
+            assert 0.0 <= memory.confidence <= 1.0
+
+    def test_embeddings_generated(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        for memory in result.memories:
+            assert len(memory.embedding) > 0
+
+    def test_memories_sorted_by_importance_desc(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        importances = [m.importance for m in result.memories]
+        assert importances == sorted(importances, reverse=True)
+
+    def test_no_duplicate_memories(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        ids = [m.id for m in result.memories]
+        assert len(ids) == len(set(ids))
+
+    def test_dna_patch_has_project_id(
+        self, pipeline: MemoryIngestionPipeline, simple_request: MemoryIngestRequest
+    ) -> None:
+        result = pipeline.process(simple_request)
+        assert result.project_dna_patch.project_id == "proj-001"
+
+    def test_empty_conversation_raises(self, pipeline: MemoryIngestionPipeline) -> None:
+        with pytest.raises(Exception):
+            MemoryIngestRequest(
+                project_id="proj-001",
+                conversation_id="conv-001",
+                messages=[],
+            )

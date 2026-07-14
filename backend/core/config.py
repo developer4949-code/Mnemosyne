@@ -59,10 +59,10 @@ class Settings(BaseSettings):
     # Security
     # ─────────────────────────────────────────────
     secret_key: str = Field(default="CHANGE_ME_IN_PRODUCTION")
-    allowed_origins: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:5173"]
+    allowed_origins: str = Field(
+        default="http://localhost:3000,http://localhost:5173"
     )
-    allowed_hosts: List[str] = Field(default=["*"])
+    allowed_hosts: str = Field(default="*")
 
     # ─────────────────────────────────────────────
     # Database (PostgreSQL)
@@ -88,8 +88,7 @@ class Settings(BaseSettings):
     # AI Providers
     # ─────────────────────────────────────────────
     groq_api_key: str = Field(default="")
-    gemini_api_key: str = Field(default="")
-    openai_api_key: str = Field(default="")
+    hf_token: str = Field(default="", validation_alias="hf_token")
 
     # ─────────────────────────────────────────────
     # Logging
@@ -127,20 +126,15 @@ class Settings(BaseSettings):
     # Validators
     # ─────────────────────────────────────────────
 
-    @field_validator("allowed_origins", mode="before")
-    @classmethod
-    def _parse_origins(cls, v: str | List[str]) -> List[str]:
-        """Accept both a Python list and a comma-separated env var string."""
-        if isinstance(v, str):
-            return [o.strip() for o in v.split(",") if o.strip()]
-        return v
+    @property
+    def allowed_origins_list(self) -> list[str]:
+        """Split comma-separated origins into a list."""
+        return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
 
-    @field_validator("allowed_hosts", mode="before")
-    @classmethod
-    def _parse_hosts(cls, v: str | List[str]) -> List[str]:
-        if isinstance(v, str):
-            return [h.strip() for h in v.split(",") if h.strip()]
-        return v
+    @property
+    def allowed_hosts_list(self) -> list[str]:
+        """Split comma-separated hosts into a list."""
+        return [h.strip() for h in self.allowed_hosts.split(",") if h.strip()]
 
     @field_validator("log_level", mode="before")
     @classmethod

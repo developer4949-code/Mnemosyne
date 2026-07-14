@@ -1,63 +1,86 @@
 # ═══════════════════════════════════════════════════════════════════
-#  Mnemosyne Backend — Dockerfile
-#  Multi-stage build: keeps the production image lean by separating
-#  the dependency installation step from the runtime image.
+#  Mnemosyne — Multi-stage Dockerfile
+#
+#  Stages:
+#    builder  — install Python dependencies into a virtual environment
+#    runtime  — lean production image that copies only what is needed
+#
+#  Usage:
+#    docker build -t mnemosyne-api .
+#    docker build --target runtime -t mnemosyne-api:latest .
 # ═══════════════════════════════════════════════════════════════════
 
-# ────────────────────────────────────────────
-# Stage 1 — dependency builder
-# ────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# Stage 1 — builder
+# Install all Python dependencies into /venv
+# ─────────────────────────────────────────────
 FROM python:3.12-slim AS builder
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
 WORKDIR /build
 
-# Install build tools needed to compile some Python wheels.
+# Install build-time system deps for asyncpg / bcrypt
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only requirements first — Docker caches this layer until
-# requirements.txt changes, keeping rebuilds fast.
+# Create an isolated virtual environment
+RUN python -m venv /venv
+ENV PATH="/venv/bin:$PATH"
+
 COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-RUN pip install --upgrade pip \
-    && pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-
-# ────────────────────────────────────────────
-# Stage 2 — production runtime
-# ────────────────────────────────────────────
+# ─────────────────────────────────────────────
+# Stage 2 — runtime
+# Minimal image for production / Docker Compose
+# ─────────────────────────────────────────────
 FROM python:3.12-slim AS runtime
 
-# Security: run as non-root user.
-RUN useradd --create-home --shell /bin/bash mnemosyne
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PATH="/venv/bin:$PATH"
+
+# Runtime system deps (libpq for asyncpg)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy virtual environment from builder stage
+COPY --from=builder /venv /venv
 
 WORKDIR /backend
 
-# Copy installed packages from builder.
-COPY --from=builder /install /usr/local
-
-# Copy application source.
+# Copy application source
 COPY . .
 
-# Create the log directory and make it writable by the app user.
-RUN mkdir -p logs && chown -R mnemosyne:mnemosyne /backend
+# Ensure logs directory exists
+RUN mkdir -p logs
 
-USER mnemosyne
+# Non-root user for security
+RUN useradd -r -s /bin/false mnemosyneuser && \
+    chown -R mnemosyneuser:mnemosyneuser /backend
+USER mnemosyneuser
 
-# Expose the default port (can be overridden via env PORT).
+# Expose application port
 EXPOSE 8000
 
-# Health check — Docker / Compose will use this.
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health/live')"
+# Health check using the live endpoint
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/health/live || exit 1
 
-# Uvicorn is the ASGI server. --workers is set to 1 here because
-# production scaling is handled at the container orchestration level
-# (multiple replicas), not inside a single container.
-CMD ["uvicorn", "app.main:app", \
+# Start Uvicorn (override with docker-compose `command` for development reload)
+CMD ["uvicorn", "main:app", \
      "--host", "0.0.0.0", \
      "--port", "8000", \
      "--workers", "1", \
-     "--log-config", "/dev/null"]
+     "--log-level", "info", \
+     "--no-access-log"]

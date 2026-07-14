@@ -57,13 +57,13 @@ def create_application() -> FastAPI:
     # 2. Trusted host
     application.add_middleware(
         TrustedHostMiddleware,
-        allowed_hosts=settings.allowed_hosts,
+        allowed_hosts=settings.allowed_hosts_list,
     )
 
     # 3. CORS
     application.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.allowed_origins,
+        allow_origins=settings.allowed_origins_list,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

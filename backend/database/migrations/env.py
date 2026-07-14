@@ -12,11 +12,17 @@ from core.config import settings
 from database.base import Base
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Import all ORM models here so Alembic can detect them for autogenerate.
-# Example:
-# from models.user import User
-# from models.project import Project
+# Import all ORM models so Alembic can detect them for autogenerate.
 # ─────────────────────────────────────────────────────────────────────────────
+import models.user          # noqa: F401
+import models.project       # noqa: F401
+import models.conversation  # noqa: F401
+import models.message       # noqa: F401
+import models.chunk         # noqa: F401
+import models.memory        # noqa: F401
+import models.relationship  # noqa: F401
+import models.project_dna   # noqa: F401
+import models.provider_config  # noqa: F401
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

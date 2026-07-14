@@ -3,10 +3,12 @@ core/lifespan.py
 
 Application lifecycle management.
 
-This module replaces the deprecated @app.on_event("startup") and 
+This module replaces the deprecated @app.on_event("startup") and
 @app.on_event("shutdown") hooks. All setup (database connection pools,
 Redis connections, logging configuration) and teardown logic lives here.
 """
+
+from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
@@ -16,7 +18,6 @@ from loguru import logger
 
 from core.config import settings
 from core.logger import setup_logging
-# from database.session import engine (will be imported later when used)
 
 
 @asynccontextmanager
@@ -24,12 +25,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
     Manage the full application lifecycle.
 
-    Code before `yield` runs at startup.
-    Code after `yield` runs at shutdown.
+    Code before ``yield`` runs at startup.
+    Code after ``yield`` runs at shutdown.
     """
     # ── STARTUP ──────────────────────────────────────────────────────────────
     setup_logging()
-    
+
     logger.info(
         "Starting {app} v{version}  env={env}  debug={debug}",
         app=settings.app_name,
@@ -38,9 +39,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         debug=settings.debug,
     )
 
-    # Future startup tasks (Milestone 2+):
-    # logger.info("Initializing database connection pool...")
-    # (The async engine connects automatically, but we might verify it here)
+    # Verify database connectivity on startup
+    try:
+        from database.session import engine
+        from sqlalchemy import text
+        async with engine.connect() as conn:
+            await conn.execute(text("SELECT 1"))
+        logger.info("Database connection pool initialised successfully.")
+    except Exception as exc:
+        logger.warning("Database not reachable at startup: {exc}", exc=exc)
 
     logger.info("Startup complete — ready to accept requests")
 
@@ -49,9 +56,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # ── SHUTDOWN ─────────────────────────────────────────────────────────────
     logger.info("Shutting down {app} …", app=settings.app_name)
 
-    # Future teardown tasks (Milestone 2+):
-    # logger.info("Disposing database connection pool...")
-    # from database.session import engine
-    # await engine.dispose()
+    try:
+        from database.session import engine
+        await engine.dispose()
+        logger.info("Database connection pool disposed.")
+    except Exception as exc:
+        logger.warning("Error disposing database pool: {exc}", exc=exc)
 
     logger.info("Shutdown complete.")

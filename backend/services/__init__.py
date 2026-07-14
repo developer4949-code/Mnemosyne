@@ -3,21 +3,30 @@ services/__init__.py
 
 Business logic layer.
 
-Services sit between the API layer and the data/AI layers.
-They orchestrate repositories and memory engine components
-to fulfill business use cases.
-
-Rules:
-  * Services never import from `api/` — no FastAPI-specific types here.
-  * Services call repositories for data and memory_engine for AI work.
-  * Each service has a single responsibility (document ingestion,
-    conversation management, memory retrieval, etc.).
-
-Future services (added in Milestone 3+):
-  document_service.py
-  ingestion_service.py
-  conversation_service.py
-  memory_service.py
-  search_service.py
-  project_service.py
+This package exposes factories for all service classes used by the API layer.
 """
+
+from .auth import AuthService, get_auth_service
+from .conversation import ConversationService, get_conversation_service
+from .health import HealthCheckService, get_health_check_service
+from .memory import MemoryService, get_memory_service
+from .project import ProjectService, get_project_service
+from .providers import ProviderService, get_provider_service
+from .search import RetrievalService, get_retrieval_service
+
+__all__ = [
+    "AuthService",
+    "get_auth_service",
+    "ConversationService",
+    "get_conversation_service",
+    "HealthCheckService",
+    "get_health_check_service",
+    "MemoryService",
+    "get_memory_service",
+    "ProjectService",
+    "get_project_service",
+    "ProviderService",
+    "get_provider_service",
+    "RetrievalService",
+    "get_retrieval_service",
+]
