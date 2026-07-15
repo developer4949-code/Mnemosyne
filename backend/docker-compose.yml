@@ -34,7 +34,7 @@ services:
       # Override DB/Redis/Qdrant URLs to use service names defined below.
       DATABASE_URL: "postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/${POSTGRES_DB:-mnemosyne}"
       REDIS_URL: "redis://redis:6379/0"
-      QDRANT_URL: "http://qdrant:6333"
+      QDRANT_URL: "${QDRANT_URL:-http://qdrant:6333}"
     volumes:
       # Mount source code for live reload during development.
       # Remove this volume for production deployments.
