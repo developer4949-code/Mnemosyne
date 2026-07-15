@@ -24,6 +24,14 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from core.config import settings
+from uuid import uuid4
+from asyncpg import Connection
+
+
+class UniqueNameConnection(Connection):
+    def _get_unique_id(self, prefix: str) -> str:
+        return f"__asyncpg_{prefix}_{uuid4()}__"
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Engine
@@ -38,6 +46,10 @@ engine_args = {
 if not settings.database_url.startswith("sqlite"):
     engine_args["pool_size"] = settings.database_pool_size
     engine_args["max_overflow"] = settings.database_max_overflow
+    engine_args["connect_args"] = {
+        "connection_class": UniqueNameConnection,
+        "statement_cache_size": 0,
+    }
 
 engine: AsyncEngine = create_async_engine(settings.database_url, **engine_args)
 

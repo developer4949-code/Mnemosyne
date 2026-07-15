@@ -23,6 +23,14 @@ import models.memory  # noqa: F401
 import models.relationship  # noqa: F401
 import models.project_dna  # noqa: F401
 import models.provider_config  # noqa: F401
+from uuid import uuid4
+from asyncpg import Connection as AsyncpgConnection
+
+
+class UniqueNameConnection(AsyncpgConnection):
+    def _get_unique_id(self, prefix: str) -> str:
+        return f"__asyncpg_{prefix}_{uuid4()}__"
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -78,10 +86,18 @@ async def run_async_migrations() -> None:
     configuration = config.get_section(config.config_ini_section, {})
     configuration["sqlalchemy.url"] = get_url()
 
+    connect_args = {}
+    if not get_url().startswith("sqlite"):
+        connect_args = {
+            "connection_class": UniqueNameConnection,
+            "statement_cache_size": 0,
+        }
+
     connectable = async_engine_from_config(
         configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
+        connect_args=connect_args,
     )
 
     async with connectable.connect() as connection:
