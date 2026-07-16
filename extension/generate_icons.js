@@ -17,8 +17,8 @@ const { createCanvas } = (() => {
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#6C5CE7"/>
-      <stop offset="100%" style="stop-color:#A855F7"/>
+      <stop offset="0%" style="stop-color:#3F8F84"/>
+      <stop offset="100%" style="stop-color:#B58A3A"/>
     </linearGradient>
   </defs>
   <rect width="${size}" height="${size}" rx="${size * 0.2}" fill="url(#bg)"/>

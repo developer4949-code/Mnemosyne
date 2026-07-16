@@ -12,11 +12,11 @@ def create_png(size, filepath):
     for y in range(height):
         row = []
         for x in range(width):
-            # Purple gradient background
+            # Verdigris-to-brass gradient background
             t = (x + y) / (width + height)
-            r = int(108 + (168 - 108) * t)  # 6C -> A8
-            g = int(92 + (85 - 92) * t)     # 5C -> 55
-            b = int(231 + (247 - 231) * t)  # E7 -> F7
+            r = int(63 + (181 - 63) * t)    # 3F -> B5
+            g = int(143 + (138 - 143) * t)  # 8F -> 8A
+            b = int(132 + (58 - 132) * t)   # 84 -> 3A
             a = 255
             
             # Rounded corners

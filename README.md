@@ -13,42 +13,79 @@
 
 ## 📖 Overview
 
-Current AI assistants lose all project context the moment you start a new conversation.  
-**Mnemosyne solves this** by continuously transforming conversations into structured knowledge.
+### The What: What is Mnemosyne?
+Mnemosyne is a persistent memory and knowledge-synthesis layer designed for Large Language Models. By connecting a browser extension directly to a FastAPI backend and structured vector stores, it ensures that your AI assistant retains context, specifications, and project choices across separate conversations.
 
-The system:
-- Captures conversations from popular AI platforms (ChatGPT, Gemini, Claude, Perplexity).
-- Extracts facts, decisions, bugs, TODOs, dependencies, and relationships.
-- Stores them as dense vector embeddings in Qdrant.
-- On new conversations, retrieves and injects the most relevant context automatically.
+### The Why: The Real-World Problem It Solves
+Current LLM assistants (ChatGPT, Claude, Gemini, etc.) are **stateless**. The moment you close a tab or click "New Chat", all project history, resolved bugs, coding standards, database schemas, and architectural choices are completely forgotten. 
+
+When you start a new conversation, you are hit with high cognitive load and manual overhead:
+1. You have to explain your project goals and architecture again.
+2. You must copy-paste dependency files, configurations, and API keys.
+3. You have to re-verify resolved bugs so the model doesn't re-propose broken solutions.
+
+**Mnemosyne resolves this by acting as your project's digital hippocampus.** It continuously observes developer chats, distills unstructured conversation threads into clear facts, code intents, decisions, and bugs, and stores them in a dense vector index. The next time you start a new chat, the extension queries the vector index for relevant past context and automatically injects it, ensuring the AI is instantly aligned.
 
 ---
 
 ## 🏗️ Architecture
 
+How the client extension, memory ingestion flow, structured extraction pipelines, and storage engines cooperate:
+
+```mermaid
+graph TD
+    subgraph Client ["Client Side (Browser)"]
+        A[Chrome Extension - Popup UI] -->|Save Settings & Projects| B[(Local Extension Storage)]
+        C[Content Script - content.js] -->|Auto-Inject Retrieved Context| D[ChatGPT / Gemini / Claude UI]
+        C -->|Capture Chat Messages| E[Service Worker - background.js]
+        E -->|Secure REST Requests| F[FastAPI Backend Server]
+    end
+
+    subgraph Service ["Backend Core Service Layer"]
+        F --> G[Auth & JWT Verification]
+        F --> H[Memory Router]
+        F --> I[Retrieval Router]
+        F --> J[Projects Router]
+        
+        H -->|1. Queue Raw Conversation| K[Memory Ingestion Worker]
+        K -->|2. Fragment Sentences| L[Chunking Engine]
+        L -->|3. Extract Intent/Bugs| M[LLM Fact Extractor]
+        M -->|4. Assess Fact Quality| N[Importance Scorer]
+        N -->|5. Compute Embedding| O[Vector Embeddings Service]
+        N -->|6. Relate Entities| P[Knowledge Graph Engine]
+        
+        P -->|7. Synthesize Facts| Q[Project DNA Builder]
+        
+        I -->|1. Semantic Query| R[Hybrid Retrieval Service]
+        R -->|2. Rerank & Assemble| S[Context Builder]
+        S -->|3. Context Optimization| T[Prompt Optimizer]
+        T -->|4. Return Injected Context| C
+    end
+
+    subgraph Storage ["Persistent & Cache Databases"]
+        G -->|Validate Profiles| DB_PG[(PostgreSQL Database)]
+        J -->|Manage Workspace Projects| DB_PG
+        O -->|Store Dense Embeddings| DB_QD[(Qdrant Vector Database)]
+        R -->|Vector Similarity Query| DB_QD
+        K -->|Async Queue & Cache| DB_RD[(Redis Memory Cache)]
+    end
+    
+    subgraph Providers ["AI Model Providers"]
+        M -->|LLM Context Extraction| PR_RT[Provider Router]
+        PR_RT -->|Adapter| PR_GP[Google Gemini API]
+        PR_RT -->|Adapter| PR_GR[Groq Cloud API]
+        PR_RT -->|Adapter| PR_OL[Ollama Local API]
+        PR_RT -->|Adapter| PR_HF[Hugging Face Spaces]
+    end
 ```
-Browser Extension (Chrome)
-        │  captures messages
-        ▼
-FastAPI Backend (REST API)
-        │
-        ├── Memory Engine
-        │       ├── Chunking
-        │       ├── Knowledge Extraction (rule-based → LLM-enhanced)
-        │       ├── Importance Scoring
-        │       ├── Embedding Generation
-        │       ├── Vector Storage (Qdrant)
-        │       ├── Knowledge Graph
-        │       ├── Project DNA
-        │       ├── Context Builder
-        │       └── Prompt Optimizer
-        │
-        ├── Provider Router (Groq / Gemini / OpenRouter / Ollama / HuggingFace)
-        │
-        ├── PostgreSQL (structured data)
-        ├── Redis (caching)
-        └── Qdrant (vector database)
-```
+
+---
+
+## 🛠️ Chrome Web Store Publishing Status
+
+> [!NOTE]
+> **Why this extension is loaded locally:**
+> Mnemosyne is fully functional and designed to run locally. It has not been published to the public Chrome Web Store because of upfront store registration fees and ongoing developer verification costs. To run the extension, load the `extension/` directory directly into Chrome using **Developer mode** ("Load unpacked") as outlined in the Quick Start below.
 
 ---
 
