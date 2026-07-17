@@ -1,19 +1,10 @@
----
-title: Mnemosyne
-emoji: 🧠
-colorFrom: green
-colorTo: yellow
-sdk: gradio
-app_port: 7860
----
-
 # 🧠 Mnemosyne — AI Memory Platform
 
 > **Persistent memory layer for Large Language Models.**
 >
 > Mnemosyne remembers your projects so you never have to rebuild context again.
 
-[![CI](https://github.com/your-org/mnemosyne/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/mnemosyne/actions)
+[![CI](https://github.com/your-org/mnemosyne/actions/workflows/ci.yml/badge.svg)](https://github.com/developer4949-code/mnemosyne/actions)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.116-green.svg)](https://fastapi.tiangolo.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
