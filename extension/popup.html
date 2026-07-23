@@ -22,7 +22,8 @@
 
     <!-- ── Login View ── -->
     <section id="view-login" class="view">
-      <h2 class="view-title">Sign in to Mnemosyne</h2>
+      <h2 id="auth-title" class="view-title">Sign in to Mnemosyne</h2>
+      
       <form id="form-login" autocomplete="on">
         <div class="field">
           <label for="input-email">Email</label>
@@ -34,12 +35,30 @@
         </div>
         <div id="login-error" class="error-msg" style="display:none"></div>
         <button id="btn-login" type="submit" class="btn-primary">Sign In</button>
+        <div class="toggle-view" style="text-align: center; margin-top: 12px; font-size: 13px;">
+          <a href="#" id="link-to-signup" style="color: var(--color-primary); text-decoration: none;">Don't have an account? Sign up</a>
+        </div>
       </form>
-      <div class="api-config">
-        <label for="input-api-url">API URL</label>
-        <input id="input-api-url" type="url" placeholder="http://localhost:8000/api/v1" />
-        <button id="btn-save-api" class="btn-secondary btn-sm">Save</button>
-      </div>
+
+      <form id="form-signup" autocomplete="on" style="display:none">
+        <div class="field">
+          <label for="input-signup-name">Full Name (Optional)</label>
+          <input id="input-signup-name" type="text" placeholder="John Doe" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="input-signup-email">Email</label>
+          <input id="input-signup-email" type="email" placeholder="you@example.com" required autocomplete="email" />
+        </div>
+        <div class="field">
+          <label for="input-signup-password">Password</label>
+          <input id="input-signup-password" type="password" placeholder="••••••••" required autocomplete="new-password" minlength="8" />
+        </div>
+        <div id="signup-error" class="error-msg" style="display:none"></div>
+        <button id="btn-signup" type="submit" class="btn-primary">Sign Up</button>
+        <div class="toggle-view" style="text-align: center; margin-top: 12px; font-size: 13px;">
+          <a href="#" id="link-to-login" style="color: var(--color-primary); text-decoration: none;">Already have an account? Sign in</a>
+        </div>
+      </form>
     </section>
 
     <!-- ── Main View ── -->

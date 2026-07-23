@@ -79,6 +79,7 @@ body {
   text-transform: uppercase;
   letter-spacing: .5px;
 }
+input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="url"],

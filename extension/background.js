@@ -15,7 +15,7 @@
 // Configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
-const DEFAULT_API_URL = "http://localhost:8000/api/v1";
+const DEFAULT_API_URL = "https://mnemosyne-fyv5.onrender.com/api/v1";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Storage helpers
@@ -153,6 +153,21 @@ async function showNotification(title, message) {
 // Login
 // ─────────────────────────────────────────────────────────────────────────────
 
+async function register(email, password, full_name) {
+  const baseUrl = await getApiUrl();
+  const response = await fetch(`${baseUrl}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, full_name }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.message || "Registration failed");
+  }
+  return response.json();
+}
+
 async function login(email, password) {
   const baseUrl = await getApiUrl();
   const response = await fetch(`${baseUrl}/auth/login`, {
@@ -207,6 +222,16 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       case "RETRIEVE_CONTEXT":
         const context = await retrieveContext(message.payload?.query);
         sendResponse({ context });
+        break;
+
+      case "REGISTER":
+        try {
+          await register(message.payload.email, message.payload.password, message.payload.full_name);
+          const result = await login(message.payload.email, message.payload.password);
+          sendResponse({ ok: true, data: result });
+        } catch (err) {
+          sendResponse({ ok: false, error: err.message });
+        }
         break;
 
       case "LOGIN":

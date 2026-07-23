@@ -24,8 +24,15 @@ const $loginError  = document.getElementById("login-error");
 const $btnLogin    = document.getElementById("btn-login");
 const $btnLogout   = document.getElementById("btn-logout");
 
-const $inputApiUrl  = document.getElementById("input-api-url");
-const $btnSaveApi   = document.getElementById("btn-save-api");
+const $authTitle   = document.getElementById("auth-title");
+const $formSignup  = document.getElementById("form-signup");
+const $inputSignupName = document.getElementById("input-signup-name");
+const $inputSignupEmail = document.getElementById("input-signup-email");
+const $inputSignupPwd = document.getElementById("input-signup-password");
+const $signupError = document.getElementById("signup-error");
+const $btnSignup   = document.getElementById("btn-signup");
+const $linkToSignup = document.getElementById("link-to-signup");
+const $linkToLogin = document.getElementById("link-to-login");
 
 const $selectProject  = document.getElementById("select-project");
 const $btnRefreshProj = document.getElementById("btn-refresh-projects");
@@ -70,6 +77,11 @@ function setLoginError(msg) {
   $loginError.style.display = msg ? "block" : "none";
 }
 
+function setSignupError(msg) {
+  $signupError.textContent = msg;
+  $signupError.style.display = msg ? "block" : "none";
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // State transitions
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,10 +103,6 @@ function showMain() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function init() {
-  // Load saved API URL
-  const { apiUrl } = await new Promise((r) => chrome.storage.local.get(["apiUrl"], r));
-  if (apiUrl) $inputApiUrl.value = apiUrl;
-
   // Check auth
   const { authToken } = await new Promise((r) => chrome.storage.local.get(["authToken"], r));
   if (authToken) {
@@ -183,6 +191,51 @@ async function updateCaptureStatus() {
 // Event handlers
 // ─────────────────────────────────────────────────────────────────────────────
 
+$linkToSignup.addEventListener("click", (e) => {
+  e.preventDefault();
+  $formLogin.style.display = "none";
+  $formSignup.style.display = "block";
+  $authTitle.textContent = "Sign up for Mnemosyne";
+  setLoginError("");
+  setSignupError("");
+});
+
+$linkToLogin.addEventListener("click", (e) => {
+  e.preventDefault();
+  $formSignup.style.display = "none";
+  $formLogin.style.display = "block";
+  $authTitle.textContent = "Sign in to Mnemosyne";
+  setLoginError("");
+  setSignupError("");
+});
+
+$formSignup.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  setSignupError("");
+  $btnSignup.disabled = true;
+  $btnSignup.textContent = "Signing up…";
+
+  const { ok, error } = await sendBg({
+    type: "REGISTER",
+    payload: { 
+      email: $inputSignupEmail.value, 
+      password: $inputSignupPwd.value,
+      full_name: $inputSignupName.value || undefined
+    },
+  });
+
+  $btnSignup.disabled = false;
+  $btnSignup.textContent = "Sign Up";
+
+  if (ok) {
+    showMain();
+    await loadProjects();
+    await updateCaptureStatus();
+  } else {
+    setSignupError(error || "Registration failed. Check your details.");
+  }
+});
+
 $formLogin.addEventListener("submit", async (e) => {
   e.preventDefault();
   setLoginError("");
@@ -209,15 +262,6 @@ $formLogin.addEventListener("submit", async (e) => {
 $btnLogout.addEventListener("click", async () => {
   await sendBg({ type: "LOGOUT" });
   showLogin();
-});
-
-$btnSaveApi.addEventListener("click", async () => {
-  const url = $inputApiUrl.value.trim();
-  if (url) {
-    await sendBg({ type: "SET_API_URL", payload: { apiUrl: url } });
-    showStatus("API URL saved.", "success");
-    setTimeout(hideStatus, 2000);
-  }
 });
 
 $btnRefreshProj.addEventListener("click", loadProjects);
