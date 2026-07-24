@@ -24,9 +24,9 @@ class QdrantVectorStore:
         self._client = QdrantClient(
             url=settings.qdrant_url, api_key=settings.qdrant_api_key or None
         )
-        self._ensure_collection()
+        self._collection_checked = False
 
-    def _ensure_collection(self) -> None:
+    def _ensure_collection_sync(self) -> None:
         target_size = 384
         try:
             info = self._client.get_collection(self.COLLECTION_NAME)
@@ -53,7 +53,13 @@ class QdrantVectorStore:
                 ),
             )
 
+    async def _ensure_collection(self) -> None:
+        if not self._collection_checked:
+            await asyncio.to_thread(self._ensure_collection_sync)
+            self._collection_checked = True
+
     async def upsert_memories(self, memories: list[MemoryCandidate]) -> None:
+        await self._ensure_collection()
         points = [
             rest.PointStruct(
                 id=memory.id,
@@ -83,6 +89,7 @@ class QdrantVectorStore:
         project_id: str | None = None,
         top_k: int = 5,
     ) -> list[MemoryCandidate]:
+        await self._ensure_collection()
         query_filter = None
         if project_id:
             query_filter = rest.Filter(
@@ -123,6 +130,7 @@ class QdrantVectorStore:
         return memories
 
     async def delete_memories_by_project(self, project_id: str) -> None:
+        await self._ensure_collection()
         query_filter = rest.Filter(
             must=[
                 rest.FieldCondition(

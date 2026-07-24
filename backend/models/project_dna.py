@@ -16,4 +16,4 @@ class ProjectDna(Base, TimestampMixin):
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), primary_key=True)
     dna: Mapped[dict[str, object]] = mapped_column(JSON, default=dict)
 
-    project = relationship("Project", lazy="joined")
+    project = relationship("Project", lazy="selectin")

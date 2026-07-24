@@ -28,5 +28,5 @@ class Memory(Base, TimestampMixin):
     attributes: Mapped[dict[str, object]] = mapped_column(JSON, default=dict)
 
     conversation = relationship(
-        "Conversation", back_populates="memories", lazy="joined"
+        "Conversation", back_populates="memories", lazy="selectin"
     )

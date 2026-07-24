@@ -20,7 +20,7 @@ class Project(Base, TimestampMixin):
     meta: Mapped[dict[str, object]] = mapped_column("metadata", JSON, default=dict)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
-    owner = relationship("User", back_populates="projects", lazy="joined")
+    owner = relationship("User", back_populates="projects", lazy="selectin")
     conversations = relationship(
         "Conversation", back_populates="project", lazy="selectin"
     )

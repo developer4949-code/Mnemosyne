@@ -25,7 +25,7 @@ class Conversation(Base, TimestampMixin):
         DateTime(timezone=True), nullable=True
     )
 
-    project = relationship("Project", back_populates="conversations", lazy="joined")
+    project = relationship("Project", back_populates="conversations", lazy="selectin")
     messages = relationship("Message", back_populates="conversation", lazy="selectin")
     chunks = relationship("Chunk", back_populates="conversation", lazy="selectin")
     memories = relationship("Memory", back_populates="conversation", lazy="selectin")

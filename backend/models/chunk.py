@@ -24,4 +24,4 @@ class Chunk(Base, TimestampMixin):
     token_estimate: Mapped[int] = mapped_column(Integer, nullable=False)
     meta: Mapped[dict[str, object]] = mapped_column("metadata", JSON, default=dict)
 
-    conversation = relationship("Conversation", back_populates="chunks", lazy="joined")
+    conversation = relationship("Conversation", back_populates="chunks", lazy="selectin")

@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     # Security
     # ─────────────────────────────────────────────
     secret_key: str = Field(default="CHANGE_ME_IN_PRODUCTION")
-    allowed_origins: str = Field(default="http://localhost:3000,http://localhost:5173")
+    allowed_origins: str = Field(default="http://localhost:3000,http://localhost:5173,chrome-extension://hhknhgcjdoefdpemmknckbbafoneaalp")
     allowed_hosts: str = Field(default="*")
 
     # ─────────────────────────────────────────────

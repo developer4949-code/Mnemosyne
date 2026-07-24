@@ -91,9 +91,8 @@ async def get_project_dna(
 ) -> SuccessResponse[ProjectDnaResponse]:
     response = await project_service.get_project_dna(project_id)
     if response is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Project DNA not found."
-        )
+        # Return empty DNA instead of 404 to avoid frontend errors for new projects
+        response = ProjectDnaResponse(project_id=project_id)
     return success(
         message="Project DNA retrieved.",
         data=response,

@@ -25,5 +25,5 @@ class KnowledgeRelationship(Base, TimestampMixin):
     meta: Mapped[dict[str, object]] = mapped_column("metadata", JSON, default=dict)
 
     conversation = relationship(
-        "Conversation", back_populates="relationships", lazy="joined"
+        "Conversation", back_populates="relationships", lazy="selectin"
     )
