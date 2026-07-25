@@ -50,6 +50,42 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as exc:
         logger.warning("Database not reachable at startup: {exc}", exc=exc)
 
+    # Seed AI providers from config
+    try:
+        from database.session import AsyncSessionLocal
+        from repositories.provider import ProviderConfigRepository
+        from models.provider_config import ProviderConfig
+
+        async with AsyncSessionLocal() as session:
+            repo = ProviderConfigRepository(session)
+            
+            # Check for Groq
+            if settings.groq_api_key:
+                groq_cfg = await repo.get_by_name("Groq")
+                if not groq_cfg:
+                    await repo.create(ProviderConfig(
+                        name="Groq",
+                        endpoint="https://api.groq.com/openai/v1",
+                        api_key=settings.groq_api_key,
+                        priority=100,
+                        enabled=True
+                    ))
+            
+            # Check for HuggingFace
+            if settings.hf_token:
+                hf_cfg = await repo.get_by_name("HuggingFace")
+                if not hf_cfg:
+                    await repo.create(ProviderConfig(
+                        name="HuggingFace",
+                        endpoint="https://api-inference.huggingface.co/models/",
+                        api_key=settings.hf_token,
+                        priority=200,
+                        enabled=True
+                    ))
+        logger.info("Provider configurations verified/seeded.")
+    except Exception as exc:
+        logger.warning("Error seeding providers: {exc}", exc=exc)
+
     logger.info("Startup complete — ready to accept requests")
 
     yield  # ◄── application is live here ─────────────────────────────────────
