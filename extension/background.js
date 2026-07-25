@@ -82,7 +82,9 @@ async function syncMessagesToBackend(messages, tabUrl, platformName) {
     return;
   }
 
-  const conversationId = `ext-${btoa(tabUrl).slice(0, 24)}`;
+  const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(tabUrl));
+  const hash = Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, "0")).join("").slice(0, 24);
+  const conversationId = `ext-${hash}`;
 
   try {
     await apiRequest("/memory/ingest", {
