@@ -50,7 +50,7 @@ Your response MUST be a single JSON object matching this schema exactly:
   "relationships": [
     {{
       "source": "lowercase concept name (noun)",
-      "relation": "depends_on" | "uses" | "updates",
+      "relation": "depends_on" | "uses" | "updates" | "relates_to" | "requires" | "implements" | "is_a",
       "target": "lowercase concept name (noun)",
       "confidence": 0.90
     }}
