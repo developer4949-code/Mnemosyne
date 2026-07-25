@@ -53,6 +53,15 @@ class QdrantVectorStore:
                 ),
             )
 
+        try:
+            self._client.create_payload_index(
+                collection_name=self.COLLECTION_NAME,
+                field_name="project_id",
+                field_schema=rest.PayloadSchemaType.KEYWORD,
+            )
+        except Exception:
+            pass
+
     async def _ensure_collection(self) -> None:
         if not self._collection_checked:
             await asyncio.to_thread(self._ensure_collection_sync)
