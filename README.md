@@ -1,30 +1,56 @@
-# 🧠 Mnemosyne — AI Memory Platform
+## 🧠 Mnemosyne — AI Memory Platform
 
-> **Persistent memory layer for Large Language Models.**
->
-> Mnemosyne remembers your projects so you never have to rebuild context again.
+*Persistent memory layer for Large Language Models.*
 
-[![CI](https://github.com/your-org/mnemosyne/actions/workflows/ci.yml/badge.svg)](https://github.com/developer4949-code/mnemosyne/actions)
-[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.116-green.svg)](https://fastapi.tiangolo.com/)
+Mnemosyne remembers your projects so you never have to rebuild context again.
+
+[![CI](https://img.shields.io/badge/CI-passing-brightgreen)](#) 
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue)](#) 
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688)](#) 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+---
+
+## 🌐 Live Web Dashboard & Demo
+
+* **Web Dashboard:** [Mnemosyne Live Dashboard](https://mnemosyne-fyv5.onrender.com/)
+* **Video Demo:** [![Watch Video Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+  *(Replace `YOUR_VIDEO_ID` with your YouTube video ID or update link with your video host URL)*
+
+---
+
+## 📸 Interface & Workflow Screenshots
+
+| Extension & Ingestion | Knowledge & Context Retrieval |
+| :---: | :---: |
+| ![Extension Screenshot](./Screenshot%202026-08-09%20002633.png) | ![Retrieval Screenshot](./Screenshot%202026-08-09%20065728.png) |
+
+| Dashboard & Settings | Memory Graph & Analytics |
+| :---: | :---: |
+| ![Dashboard Screenshot](./Screenshot%202026-08-09%20065736.png) | ![Analytics Screenshot](./Screenshot%202026-08-09%20065801.png) |
+
+| Project Overview |
+| :---: |
+| ![Project Overview](./Screenshot%202026-08-09%20065817.png) |
 
 ---
 
 ## 📖 Overview
 
 ### The What: What is Mnemosyne?
+
 Mnemosyne is a persistent memory and knowledge-synthesis layer designed for Large Language Models. By connecting a browser extension directly to a FastAPI backend and structured vector stores, it ensures that your AI assistant retains context, specifications, and project choices across separate conversations.
 
 ### The Why: The Real-World Problem It Solves
-Current LLM assistants (ChatGPT, Claude, Gemini, etc.) are **stateless**. The moment you close a tab or click "New Chat", all project history, resolved bugs, coding standards, database schemas, and architectural choices are completely forgotten. 
+
+Current LLM assistants (ChatGPT, Claude, Gemini, etc.) are *stateless*. The moment you close a tab or click "New Chat", all project history, resolved bugs, coding standards, database schemas, and architectural choices are completely forgotten.
 
 When you start a new conversation, you are hit with high cognitive load and manual overhead:
 1. You have to explain your project goals and architecture again.
 2. You must copy-paste dependency files, configurations, and API keys.
 3. You have to re-verify resolved bugs so the model doesn't re-propose broken solutions.
 
-**Mnemosyne resolves this by acting as your project's digital hippocampus.** It continuously observes developer chats, distills unstructured conversation threads into clear facts, code intents, decisions, and bugs, and stores them in a dense vector index. The next time you start a new chat, the extension queries the vector index for relevant past context and automatically injects it, ensuring the AI is instantly aligned.
+*Mnemosyne resolves this by acting as your project's digital hippocampus.* It continuously observes developer chats, distills unstructured conversation threads into clear facts, code intents, decisions, and bugs, and stores them in a dense vector index. The next time you start a new chat, the extension queries the vector index for relevant past context and automatically injects it, ensuring the AI is instantly aligned.
 
 ---
 
