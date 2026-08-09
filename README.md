@@ -10,20 +10,18 @@ Mnemosyne remembers your projects so you never have to rebuild context again.
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
-
 ## 🌐 Live Web Dashboard & Demo
 
 * **Web Dashboard:** [Mnemosyne Live Dashboard](https://mnemosyne-fyv5.onrender.com/)
-* **Video Demo:** [![Watch Video Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
-  *(Replace `YOUR_VIDEO_ID` with your YouTube video ID or update link with your video host URL)*
+* **Video Demo Link:** [Watch Video Demo](https://mnemosyne-fyv5.onrender.com/) *(Update with your exact video link or YouTube ID)*
 
 ---
 
 ## 📸 Interface & Workflow Screenshots
 
-| Extension & Ingestion | Knowledge & Context Retrieval |
-| :---: | :---: |
-| ![Extension Screenshot](./Screenshot%202026-08-09%20002633.png) | ![Retrieval Screenshot](./Screenshot%202026-08-09%20065728.png) |
+| Knowledge & Context Retrieval |
+| :---: |
+| ![Retrieval Screenshot](./Screenshot%202026-08-09%20065728.png) |
 
 | Dashboard & Settings | Memory Graph & Analytics |
 | :---: | :---: |
@@ -32,7 +30,6 @@ Mnemosyne remembers your projects so you never have to rebuild context again.
 | Project Overview |
 | :---: |
 | ![Project Overview](./Screenshot%202026-08-09%20065817.png) |
-
 ---
 
 ## 📖 Overview
