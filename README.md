@@ -12,7 +12,7 @@ Mnemosyne remembers your projects so you never have to rebuild context again.
 ---
 ## 🌐 Live Web Dashboard & Demo
 
-* **Web Dashboard:** [Mnemosyne Live Dashboard](https://mnemosyne-fyv5.onrender.com/)
+* **Web Dashboard:** [Mnemosyne Live Dashboard](https://mnemosyne-fyv5.onrender.com/dashboard)
 * **Video Demo Link:** [Watch Video Demo](https://mnemosyne-fyv5.onrender.com/) *(Update with your exact video link or YouTube ID)*
 
 ---
